@@ -1661,17 +1661,27 @@ html, body {
   }
 
   // Browser back-button handler
+  // Browser native back-button handler
   window.addEventListener('popstate', (e) => {
-    if (state.screenHistory.length > 1) {
-      state.screenHistory.pop();
+    const targetScreen = (e.state && e.state.screen) ? e.state.screen : 'screen-dashboard';
+    if (state.currentScreen !== targetScreen) {
+      const targetIdx = state.screenHistory.indexOf(targetScreen);
+      if (targetIdx !== -1) {
+        state.screenHistory = state.screenHistory.slice(0, targetIdx + 1);
+      } else {
+        state.screenHistory.push(targetScreen);
+      }
+      goTo(targetScreen, false);
     }
-    const prev = state.screenHistory[state.screenHistory.length - 1] || 'screen-dashboard';
-    goTo(prev, false);
   });
 
+  // App's UI back button handler
   function goBack() {
     if (state.screenHistory.length > 1) {
-      history.back();
+      state.screenHistory.pop();
+      const prev = state.screenHistory[state.screenHistory.length - 1];
+      goTo(prev, false);
+      try { history.back(); } catch(e) {}
     } else {
       state.screenHistory = ['screen-dashboard'];
       goTo('screen-dashboard', false);
