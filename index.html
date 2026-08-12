@@ -577,143 +577,182 @@ html, body {
 .toast-ios.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
 /* ============================================================
-   SCREEN 6 — SUCCESS / ENTREGA COMPLETADA
+   SCREEN 6 — SUCCESS / iOS CLEAN WHITE
    ============================================================ */
 #screen-success {
   display: flex; flex-direction: column;
-  background: linear-gradient(160deg, #0A0A1A 0%, #0D1F3C 50%, #0A0A1A 100%);
+  background: var(--bg-app);
   overflow: hidden;
 }
 
-/* Confetti canvas */
+/* Confetti canvas (still used, subtle) */
 #confetti-canvas {
   position: absolute; inset: 0;
   z-index: 1; pointer-events: none;
 }
 
-/* Content above canvas */
 .success-body {
   position: relative; z-index: 2;
   flex: 1; overflow-y: auto;
   display: flex; flex-direction: column;
   align-items: center;
-  padding: 0 24px;
+  padding: 0 24px 24px;
 }
 
-/* Trophy / check hero */
-.success-trophy {
-  margin-top: 52px;
-  width: 120px; height: 120px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 35% 35%, #FFD60A, #FF9500);
+/* Green glow ring hero */
+.success-check-wrap {
+  margin-top: 56px;
+  position: relative;
+  width: 140px; height: 140px;
   display: flex; align-items: center; justify-content: center;
-  box-shadow:
-    0 0 0 16px rgba(255,214,10,0.10),
-    0 0 0 32px rgba(255,214,10,0.05),
-    0 16px 48px rgba(255,149,0,0.4);
-  animation: trophy-pop 0.65s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-  opacity: 0;
+  animation: suc-pop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
-@keyframes trophy-pop {
-  0%   { opacity: 0; transform: scale(0.4) rotate(-15deg); }
-  100% { opacity: 1; transform: scale(1)   rotate(0deg); }
+@keyframes suc-pop {
+  0%   { opacity: 0; transform: scale(0.5); }
+  100% { opacity: 1; transform: scale(1); }
 }
-.success-trophy .material-symbols-outlined {
-  font-size: 64px; color: #fff; font-variation-settings: 'FILL' 1;
+/* Concentric glow rings */
+.success-check-wrap::before {
+  content: '';
+  position: absolute; inset: -18px;
+  border-radius: 50%;
+  background: rgba(52,199,89,0.08);
+  animation: ring-pulse 2.4s ease-in-out infinite;
+}
+.success-check-wrap::after {
+  content: '';
+  position: absolute; inset: -8px;
+  border-radius: 50%;
+  background: rgba(52,199,89,0.12);
+  animation: ring-pulse 2.4s 0.3s ease-in-out infinite;
+}
+@keyframes ring-pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50%       { transform: scale(1.08); opacity: 0.5; }
+}
+.success-check-circle {
+  position: relative; z-index: 1;
+  width: 104px; height: 104px; border-radius: 50%;
+  background: #34C759;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 8px 32px rgba(52,199,89,0.35), 0 2px 8px rgba(52,199,89,0.2);
+}
+/* SVG check drawn with stroke animation */
+.suc-check-svg { width: 52px; height: 52px; }
+.suc-check-path {
+  fill: none; stroke: #fff; stroke-width: 5;
+  stroke-linecap: round; stroke-linejoin: round;
+  stroke-dasharray: 80;
+  stroke-dashoffset: 80;
+  animation: draw-check 0.4s 0.35s ease forwards;
+}
+@keyframes draw-check {
+  to { stroke-dashoffset: 0; }
 }
 
 /* Headline */
 .success-headline {
   margin-top: 28px; text-align: center;
-  animation: fade-up 0.5s 0.4s ease both;
+  animation: suc-fade-up 0.45s 0.45s ease both;
 }
 .success-headline .big {
-  font-size: 28px; font-weight: 800;
-  color: #FFFFFF; line-height: 1.15;
+  font-size: 30px; font-weight: 800;
+  color: var(--text-primary); line-height: 1.15;
 }
 .success-headline .sub {
-  font-size: 14px; color: rgba(255,255,255,0.55);
+  font-size: 13px; color: var(--text-secondary);
   margin-top: 6px; font-weight: 500;
 }
-@keyframes fade-up {
-  from { opacity: 0; transform: translateY(16px); }
+@keyframes suc-fade-up {
+  from { opacity: 0; transform: translateY(14px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* Metrics grid */
-.success-metrics {
-  width: 100%; margin-top: 32px;
-  display: grid; grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  animation: fade-up 0.5s 0.6s ease both;
+/* Stat pills row */
+.suc-stats-row {
+  display: flex; gap: 10px; margin-top: 28px; width: 100%;
+  animation: suc-fade-up 0.45s 0.6s ease both;
 }
-.suc-metric-card {
-  background: rgba(255,255,255,0.07);
-  border: 1px solid rgba(255,255,255,0.10);
-  border-radius: 20px; padding: 18px 16px;
-  display: flex; flex-direction: column; gap: 4px;
-  backdrop-filter: blur(8px);
-  transform: scale(0.85); opacity: 0;
-  transition: transform 0.45s cubic-bezier(0.34,1.56,0.64,1),
-              opacity   0.35s ease;
+.suc-stat-pill {
+  flex: 1;
+  background: var(--surface-primary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--r-lg);
+  padding: 14px 8px;
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  box-shadow: var(--shadow-sm);
+  transform: scale(0.88); opacity: 0;
+  transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s ease;
 }
-.suc-metric-card.pop { transform: scale(1); opacity: 1; }
-.suc-metric-icon {
-  width: 36px; height: 36px; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  margin-bottom: 6px;
-}
-.suc-metric-icon .material-symbols-outlined { font-size: 18px; }
-.suc-metric-val {
-  font-size: 24px; font-weight: 800; color: #FFFFFF; line-height: 1;
-}
-.suc-metric-label {
-  font-size: 11px; font-weight: 600;
-  color: rgba(255,255,255,0.45); text-transform: uppercase; letter-spacing: 0.5px;
-}
+.suc-stat-pill.pop { transform: scale(1); opacity: 1; }
+.suc-stat-icon   { font-size: 20px; line-height: 1; }
+.suc-stat-val    { font-size: 17px; font-weight: 800; color: var(--text-primary); }
+.suc-stat-label  { font-size: 10px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.4px; }
 
-/* Streak badge */
-.success-streak {
-  width: 100%; margin-top: 12px;
-  background: rgba(255,214,10,0.10);
-  border: 1px solid rgba(255,214,10,0.25);
-  border-radius: 20px; padding: 16px 20px;
-  display: flex; align-items: center; gap: 14px;
-  animation: fade-up 0.5s 1.1s ease both;
+/* Order detail card */
+.suc-order-card {
+  width: 100%; margin-top: 16px;
+  background: var(--surface-primary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  animation: suc-fade-up 0.45s 0.85s ease both;
 }
-.streak-flame { font-size: 32px; line-height: 1; }
-.streak-text .big { font-size: 15px; font-weight: 800; color: #FFD60A; }
-.streak-text .sub { font-size: 12px; color: rgba(255,255,255,0.5); margin-top: 2px; }
+.suc-order-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 13px 16px;
+}
+.suc-order-row + .suc-order-row {
+  border-top: 1px solid var(--border-subtle);
+}
+.suc-row-label { font-size: 13px; color: var(--text-secondary); font-weight: 500; }
+.suc-row-val   { font-size: 13px; color: var(--text-primary);   font-weight: 700; }
+.suc-row-val.green { color: #34C759; }
 
-/* CTA button */
+/* Streak strip */
+.suc-streak-strip {
+  width: 100%; margin-top: 14px;
+  background: #FFF8EC; border: 1px solid rgba(255,149,0,0.2);
+  border-radius: var(--r-md);
+  padding: 12px 16px;
+  display: flex; align-items: center; gap: 10px;
+  animation: suc-fade-up 0.45s 1.0s ease both;
+}
+.suc-streak-strip .lbl { font-size: 13px; font-weight: 700; color: #FF9500; }
+.suc-streak-strip .sub { font-size: 11px; color: var(--text-secondary); }
+
+/* CTA bar */
 .success-cta {
   flex-shrink: 0; z-index: 2;
-  padding: 20px 24px max(24px, env(safe-area-inset-bottom));
-  display: flex; flex-direction: column; gap: 10px;
+  padding: 16px 24px max(20px, env(safe-area-inset-bottom));
+  display: flex; flex-direction: column; gap: 8px;
+  background: var(--bg-app);
+  border-top: 1px solid var(--border-subtle);
 }
 .btn-success-primary {
-  width: 100%; height: 54px;
-  background: linear-gradient(135deg, #FFD60A, #FF9500);
+  width: 100%; height: 52px;
+  background: #34C759;
   border: none; border-radius: var(--r-full);
   font-family: var(--font); font-size: 16px; font-weight: 800;
-  color: #1C1C1E; cursor: pointer;
-  box-shadow: 0 8px 24px rgba(255,149,0,0.35);
+  color: #fff; cursor: pointer;
+  box-shadow: 0 6px 20px rgba(52,199,89,0.30);
   transition: transform 0.15s ease, box-shadow 0.15s ease;
-  animation: fade-up 0.5s 1.3s ease both;
+  animation: suc-fade-up 0.45s 1.1s ease both;
 }
 .btn-success-primary:active {
   transform: scale(0.97);
-  box-shadow: 0 4px 12px rgba(255,149,0,0.25);
+  box-shadow: 0 3px 10px rgba(52,199,89,0.2);
 }
 .btn-success-secondary {
-  width: 100%; height: 42px; border: none;
-  background: transparent; color: rgba(255,255,255,0.45);
+  width: 100%; height: 40px; border: none;
+  background: transparent; color: var(--text-secondary);
   font-family: var(--font); font-size: 13px; font-weight: 600;
   cursor: pointer; border-radius: var(--r-full);
   transition: color 0.15s;
-  animation: fade-up 0.5s 1.45s ease both;
+  animation: suc-fade-up 0.45s 1.2s ease both;
 }
-.btn-success-secondary:active { color: rgba(255,255,255,0.8); }
+.btn-success-secondary:active { color: var(--text-primary); }
 
 
 /* ============================================================
@@ -1189,61 +1228,72 @@ html, body {
   </div>
 
   <!-- ============================================================
-       SCREEN 6: ÉXITO — ENTREGA COMPLETADA
+       SCREEN 6: ÉXITO — iOS CLEAN WHITE
        ============================================================ -->
   <div class="screen" id="screen-success">
     <canvas id="confetti-canvas"></canvas>
 
     <div class="success-body">
 
-      <!-- Trophy -->
-      <div class="success-trophy">
-        <span class="material-symbols-outlined">emoji_events</span>
+      <!-- Check circle hero -->
+      <div class="success-check-wrap">
+        <div class="success-check-circle">
+          <svg class="suc-check-svg" viewBox="0 0 52 52">
+            <path class="suc-check-path" d="M12 27 L22 37 L40 17"/>
+          </svg>
+        </div>
       </div>
 
       <!-- Headline -->
       <div class="success-headline">
-        <div class="big">¡Entrega completada! 🎉</div>
-        <div class="sub" id="suc-order-label">Orden #ORD-8492 · Laura Sánchez</div>
+        <div class="big">¡Listo!</div>
+        <div class="sub" id="suc-order-label">Entrega completada · Orden #ORD-8492</div>
       </div>
 
-      <!-- Metrics grid -->
-      <div class="success-metrics">
-        <div class="suc-metric-card" id="suc-card-earn">
-          <div class="suc-metric-icon" style="background:rgba(52,199,89,0.2);">
-            <span class="material-symbols-outlined" style="color:#34C759;">payments</span>
-          </div>
-          <div class="suc-metric-val" id="suc-earning">$4.50</div>
-          <div class="suc-metric-label">Ganancia</div>
+      <!-- 3 stat pills -->
+      <div class="suc-stats-row">
+        <div class="suc-stat-pill" id="suc-pill-earn">
+          <span class="suc-stat-icon">💰</span>
+          <span class="suc-stat-val" id="suc-earning">$4.50</span>
+          <span class="suc-stat-label">Ganancia</span>
         </div>
-        <div class="suc-metric-card" id="suc-card-time">
-          <div class="suc-metric-icon" style="background:rgba(0,122,255,0.2);">
-            <span class="material-symbols-outlined" style="color:#007AFF;">schedule</span>
-          </div>
-          <div class="suc-metric-val" id="suc-time">12 min</div>
-          <div class="suc-metric-label">Tiempo total</div>
+        <div class="suc-stat-pill" id="suc-pill-time">
+          <span class="suc-stat-icon">⏱</span>
+          <span class="suc-stat-val" id="suc-time">12 min</span>
+          <span class="suc-stat-label">Tiempo</span>
         </div>
-        <div class="suc-metric-card" id="suc-card-dist">
-          <div class="suc-metric-icon" style="background:rgba(255,149,0,0.2);">
-            <span class="material-symbols-outlined" style="color:#FF9500;">route</span>
-          </div>
-          <div class="suc-metric-val" id="suc-dist">1.2 km</div>
-          <div class="suc-metric-label">Distancia</div>
-        </div>
-        <div class="suc-metric-card" id="suc-card-total">
-          <div class="suc-metric-icon" style="background:rgba(255,214,10,0.2);">
-            <span class="material-symbols-outlined" style="color:#FFD60A;">local_shipping</span>
-          </div>
-          <div class="suc-metric-val" id="suc-total-deliveries">13</div>
-          <div class="suc-metric-label">Entregas hoy</div>
+        <div class="suc-stat-pill" id="suc-pill-dist">
+          <span class="suc-stat-icon">📍</span>
+          <span class="suc-stat-val" id="suc-dist">1.2 km</span>
+          <span class="suc-stat-label">Distancia</span>
         </div>
       </div>
 
-      <!-- Streak badge -->
-      <div class="success-streak">
-        <div class="streak-flame">🔥</div>
-        <div class="streak-text">
-          <div class="big" id="suc-streak-label">¡3 entregas seguidas!</div>
+      <!-- Order detail card -->
+      <div class="suc-order-card">
+        <div class="suc-order-row">
+          <span class="suc-row-label">Cliente</span>
+          <span class="suc-row-val">Laura Sánchez</span>
+        </div>
+        <div class="suc-order-row">
+          <span class="suc-row-label">Dirección</span>
+          <span class="suc-row-val">Calle 72 #15-30</span>
+        </div>
+        <div class="suc-order-row">
+          <span class="suc-row-label">Entregas hoy</span>
+          <span class="suc-row-val" id="suc-total-deliveries">13</span>
+        </div>
+        <div class="suc-order-row">
+          <span class="suc-row-label">Estado</span>
+          <span class="suc-row-val green">✔ Entregado</span>
+        </div>
+      </div>
+
+      <!-- Streak strip -->
+      <div class="suc-streak-strip">
+        <span style="font-size:22px;">🔥</span>
+        <div>
+          <div class="lbl" id="suc-streak-label">¡3 entregas seguidas!</div>
           <div class="sub">Sigue así, vas muy bien hoy</div>
         </div>
       </div>
@@ -1965,17 +2015,17 @@ html, body {
   }
 
   function animateSuccessMetrics() {
-    ['suc-card-earn','suc-card-time','suc-card-dist','suc-card-total'].forEach((id, i) => {
+    ['suc-pill-earn','suc-pill-time','suc-pill-dist'].forEach((id, i) => {
       setTimeout(() => {
         const el = document.getElementById(id);
         if (el) el.classList.add('pop');
-      }, i * 80);
+      }, i * 90);
     });
   }
 
   function continueAfterSuccess() {
-    // Reset card states for next time
-    ['suc-card-earn','suc-card-time','suc-card-dist','suc-card-total'].forEach(id => {
+    // Reset pill states for next time
+    ['suc-pill-earn','suc-pill-time','suc-pill-dist'].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.classList.remove('pop');
     });
