@@ -1058,6 +1058,20 @@ html, body {
       </div>
     </div>
     <div class="hist-list-body" id="hist-list-body"></div>
+    <nav class="bottom-nav">
+      <button class="nav-item" onclick="setActiveNav(this)">
+        <span class="material-symbols-outlined">navigation</span>
+        <span class="nav-label">Rutas</span>
+      </button>
+      <button class="nav-item active" onclick="setActiveNav(this)">
+        <span class="material-symbols-outlined">history</span>
+        <span class="nav-label">Historial</span>
+      </button>
+      <button class="nav-item" onclick="setActiveNav(this)">
+        <span class="material-symbols-outlined">person</span>
+        <span class="nav-label">Cuenta</span>
+      </button>
+    </nav>
   </div><!-- /screen-history -->
 
   <!-- ============================================================
@@ -1553,7 +1567,9 @@ html, body {
     'screen-alert',
     'screen-pickup',
     'screen-nav',
-    'screen-checkout'
+    'screen-checkout',
+    'screen-success',
+    'screen-history'
   ];
 
   function goTo(screenId, pushHistory = true) {
@@ -1601,6 +1617,16 @@ html, body {
       history.pushState({ screen: screenId }, '', `#${screenId}`);
     }
 
+    // Sync bottom nav active tab across screens
+    document.querySelectorAll('.bottom-nav').forEach(nav => {
+      const items = nav.querySelectorAll('.nav-item');
+      if (items.length >= 2) {
+        items.forEach(i => i.classList.remove('active'));
+        if (screenId === 'screen-dashboard' && items[0]) items[0].classList.add('active');
+        if (screenId === 'screen-history' && items[1]) items[1].classList.add('active');
+      }
+    });
+
     // Side-effects per screen
     if (screenId === 'screen-nav')      setTimeout(initFullMap, 200);
     if (screenId === 'screen-checkout') resetPinState();
@@ -1608,7 +1634,9 @@ html, body {
 
   // Browser back-button handler
   window.addEventListener('popstate', (e) => {
-    state.screenHistory.pop();
+    if (state.screenHistory.length > 1) {
+      state.screenHistory.pop();
+    }
     const prev = state.screenHistory[state.screenHistory.length - 1] || 'screen-dashboard';
     goTo(prev, false);
   });
@@ -1617,6 +1645,7 @@ html, body {
     if (state.screenHistory.length > 1) {
       history.back();
     } else {
+      state.screenHistory = ['screen-dashboard'];
       goTo('screen-dashboard', false);
     }
   }
@@ -1634,14 +1663,23 @@ html, body {
   }
 
   function setActiveNav(el) {
-    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-    el.classList.add('active');
-    if (el.querySelector('.nav-label').textContent !== 'Rutas') {
-      showToast('Esta sección estará disponible próximamente');
-      // Re-activate Rutas tab
+    const label = el.querySelector('.nav-label') ? el.querySelector('.nav-label').textContent.trim() : '';
+
+    if (label === 'Rutas') {
+      goTo('screen-dashboard');
+    } else if (label === 'Historial') {
+      goToHistory();
+    } else if (label === 'Cuenta') {
+      showToast('👤 Sección de cuenta — próximamente');
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      el.classList.add('active');
       setTimeout(() => {
         el.classList.remove('active');
-        document.querySelector('.nav-item').classList.add('active');
+        const activeIdx = state.currentScreen === 'screen-history' ? 1 : 0;
+        document.querySelectorAll('.bottom-nav').forEach(nav => {
+          const items = nav.querySelectorAll('.nav-item');
+          if (items[activeIdx]) items[activeIdx].classList.add('active');
+        });
       }, 1200);
     }
   }
