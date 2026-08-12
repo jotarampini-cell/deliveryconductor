@@ -577,6 +577,146 @@ html, body {
 .toast-ios.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
 /* ============================================================
+   SCREEN 6 — SUCCESS / ENTREGA COMPLETADA
+   ============================================================ */
+#screen-success {
+  display: flex; flex-direction: column;
+  background: linear-gradient(160deg, #0A0A1A 0%, #0D1F3C 50%, #0A0A1A 100%);
+  overflow: hidden;
+}
+
+/* Confetti canvas */
+#confetti-canvas {
+  position: absolute; inset: 0;
+  z-index: 1; pointer-events: none;
+}
+
+/* Content above canvas */
+.success-body {
+  position: relative; z-index: 2;
+  flex: 1; overflow-y: auto;
+  display: flex; flex-direction: column;
+  align-items: center;
+  padding: 0 24px;
+}
+
+/* Trophy / check hero */
+.success-trophy {
+  margin-top: 52px;
+  width: 120px; height: 120px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #FFD60A, #FF9500);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow:
+    0 0 0 16px rgba(255,214,10,0.10),
+    0 0 0 32px rgba(255,214,10,0.05),
+    0 16px 48px rgba(255,149,0,0.4);
+  animation: trophy-pop 0.65s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  opacity: 0;
+}
+@keyframes trophy-pop {
+  0%   { opacity: 0; transform: scale(0.4) rotate(-15deg); }
+  100% { opacity: 1; transform: scale(1)   rotate(0deg); }
+}
+.success-trophy .material-symbols-outlined {
+  font-size: 64px; color: #fff; font-variation-settings: 'FILL' 1;
+}
+
+/* Headline */
+.success-headline {
+  margin-top: 28px; text-align: center;
+  animation: fade-up 0.5s 0.4s ease both;
+}
+.success-headline .big {
+  font-size: 28px; font-weight: 800;
+  color: #FFFFFF; line-height: 1.15;
+}
+.success-headline .sub {
+  font-size: 14px; color: rgba(255,255,255,0.55);
+  margin-top: 6px; font-weight: 500;
+}
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Metrics grid */
+.success-metrics {
+  width: 100%; margin-top: 32px;
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  animation: fade-up 0.5s 0.6s ease both;
+}
+.suc-metric-card {
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 20px; padding: 18px 16px;
+  display: flex; flex-direction: column; gap: 4px;
+  backdrop-filter: blur(8px);
+  transform: scale(0.85); opacity: 0;
+  transition: transform 0.45s cubic-bezier(0.34,1.56,0.64,1),
+              opacity   0.35s ease;
+}
+.suc-metric-card.pop { transform: scale(1); opacity: 1; }
+.suc-metric-icon {
+  width: 36px; height: 36px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 6px;
+}
+.suc-metric-icon .material-symbols-outlined { font-size: 18px; }
+.suc-metric-val {
+  font-size: 24px; font-weight: 800; color: #FFFFFF; line-height: 1;
+}
+.suc-metric-label {
+  font-size: 11px; font-weight: 600;
+  color: rgba(255,255,255,0.45); text-transform: uppercase; letter-spacing: 0.5px;
+}
+
+/* Streak badge */
+.success-streak {
+  width: 100%; margin-top: 12px;
+  background: rgba(255,214,10,0.10);
+  border: 1px solid rgba(255,214,10,0.25);
+  border-radius: 20px; padding: 16px 20px;
+  display: flex; align-items: center; gap: 14px;
+  animation: fade-up 0.5s 1.1s ease both;
+}
+.streak-flame { font-size: 32px; line-height: 1; }
+.streak-text .big { font-size: 15px; font-weight: 800; color: #FFD60A; }
+.streak-text .sub { font-size: 12px; color: rgba(255,255,255,0.5); margin-top: 2px; }
+
+/* CTA button */
+.success-cta {
+  flex-shrink: 0; z-index: 2;
+  padding: 20px 24px max(24px, env(safe-area-inset-bottom));
+  display: flex; flex-direction: column; gap: 10px;
+}
+.btn-success-primary {
+  width: 100%; height: 54px;
+  background: linear-gradient(135deg, #FFD60A, #FF9500);
+  border: none; border-radius: var(--r-full);
+  font-family: var(--font); font-size: 16px; font-weight: 800;
+  color: #1C1C1E; cursor: pointer;
+  box-shadow: 0 8px 24px rgba(255,149,0,0.35);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  animation: fade-up 0.5s 1.3s ease both;
+}
+.btn-success-primary:active {
+  transform: scale(0.97);
+  box-shadow: 0 4px 12px rgba(255,149,0,0.25);
+}
+.btn-success-secondary {
+  width: 100%; height: 42px; border: none;
+  background: transparent; color: rgba(255,255,255,0.45);
+  font-family: var(--font); font-size: 13px; font-weight: 600;
+  cursor: pointer; border-radius: var(--r-full);
+  transition: color 0.15s;
+  animation: fade-up 0.5s 1.45s ease both;
+}
+.btn-success-secondary:active { color: rgba(255,255,255,0.8); }
+
+
+/* ============================================================
    EXCEPCIÓN — Cliente no responde / Problema en entrega
    ============================================================ */
 .exception-backdrop {
@@ -992,6 +1132,137 @@ html, body {
   </div><!-- /screen-nav -->
 
   <!-- ============================================================
+       SCREEN 5: VALIDACIÓN Y PIN
+       ============================================================ -->
+  <div class="screen" id="screen-checkout">
+    <div class="app-header">
+      <button class="back-btn" onclick="goTo('screen-nav')">
+        <span class="material-symbols-outlined">chevron_left</span>
+      </button>
+      <div style="flex: 1;">
+        <div style="font-size: 16px; font-weight: 800; color: var(--text-primary);">Confirmar entrega</div>
+        <div style="font-size: 12px; color: var(--text-secondary);">Orden #ORD-8492</div>
+      </div>
+    </div>
+
+    <div class="screen-body" style="padding: var(--xl);">
+      <div style="background: var(--surface-primary); border-radius: var(--r-lg); padding: var(--lg); text-align: center; border: 1px solid var(--border-subtle); box-shadow: var(--shadow-sm); margin-bottom: var(--xl);">
+        <span class="badge badge-success">Pagado en línea</span>
+        <div style="font-size: 12px; color: var(--text-secondary); margin-top: 6px;">Monto a cobrar en sitio</div>
+        <div style="font-size: 28px; font-weight: 800; color: var(--text-primary); margin-top: 2px;">$0.00</div>
+      </div>
+
+      <div style="text-align: center;">
+        <div style="font-size: 15px; font-weight: 800; color: var(--text-primary);">Ingrese PIN del cliente</div>
+        <div style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;">Solicite los 4 dígitos de confirmación (Demo: 1234)</div>
+      </div>
+
+      <div class="pin-input-group" id="pin-input-group">
+        <div class="pin-digit-box" id="pin-box-0"></div>
+        <div class="pin-digit-box" id="pin-box-1"></div>
+        <div class="pin-digit-box" id="pin-box-2"></div>
+        <div class="pin-digit-box" id="pin-box-3"></div>
+      </div>
+      <div class="pin-attempts-msg" id="pin-attempts-msg"></div>
+
+      <div class="ios-keypad">
+        <button class="keypad-btn" onclick="pressPinKey('1')">1</button>
+        <button class="keypad-btn" onclick="pressPinKey('2')">2</button>
+        <button class="keypad-btn" onclick="pressPinKey('3')">3</button>
+        <button class="keypad-btn" onclick="pressPinKey('4')">4</button>
+        <button class="keypad-btn" onclick="pressPinKey('5')">5</button>
+        <button class="keypad-btn" onclick="pressPinKey('6')">6</button>
+        <button class="keypad-btn" onclick="pressPinKey('7')">7</button>
+        <button class="keypad-btn" onclick="pressPinKey('8')">8</button>
+        <button class="keypad-btn" onclick="pressPinKey('9')">9</button>
+        <button class="keypad-btn" style="font-size: 12px; color: var(--text-secondary);" onclick="clearPin()">C</button>
+        <button class="keypad-btn" onclick="pressPinKey('0')">0</button>
+        <button class="keypad-btn" onclick="deletePinDigit()"><span class="material-symbols-outlined">backspace</span></button>
+      </div>
+    </div>
+
+    <div class="bottom-action-bar">
+      <button id="btn-finish-delivery" class="btn btn-primary" style="width: 100%;" onclick="finishDelivery()" disabled>
+        Finalizar entrega
+      </button>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       SCREEN 6: ÉXITO — ENTREGA COMPLETADA
+       ============================================================ -->
+  <div class="screen" id="screen-success">
+    <canvas id="confetti-canvas"></canvas>
+
+    <div class="success-body">
+
+      <!-- Trophy -->
+      <div class="success-trophy">
+        <span class="material-symbols-outlined">emoji_events</span>
+      </div>
+
+      <!-- Headline -->
+      <div class="success-headline">
+        <div class="big">¡Entrega completada! 🎉</div>
+        <div class="sub" id="suc-order-label">Orden #ORD-8492 · Laura Sánchez</div>
+      </div>
+
+      <!-- Metrics grid -->
+      <div class="success-metrics">
+        <div class="suc-metric-card" id="suc-card-earn">
+          <div class="suc-metric-icon" style="background:rgba(52,199,89,0.2);">
+            <span class="material-symbols-outlined" style="color:#34C759;">payments</span>
+          </div>
+          <div class="suc-metric-val" id="suc-earning">$4.50</div>
+          <div class="suc-metric-label">Ganancia</div>
+        </div>
+        <div class="suc-metric-card" id="suc-card-time">
+          <div class="suc-metric-icon" style="background:rgba(0,122,255,0.2);">
+            <span class="material-symbols-outlined" style="color:#007AFF;">schedule</span>
+          </div>
+          <div class="suc-metric-val" id="suc-time">12 min</div>
+          <div class="suc-metric-label">Tiempo total</div>
+        </div>
+        <div class="suc-metric-card" id="suc-card-dist">
+          <div class="suc-metric-icon" style="background:rgba(255,149,0,0.2);">
+            <span class="material-symbols-outlined" style="color:#FF9500;">route</span>
+          </div>
+          <div class="suc-metric-val" id="suc-dist">1.2 km</div>
+          <div class="suc-metric-label">Distancia</div>
+        </div>
+        <div class="suc-metric-card" id="suc-card-total">
+          <div class="suc-metric-icon" style="background:rgba(255,214,10,0.2);">
+            <span class="material-symbols-outlined" style="color:#FFD60A;">local_shipping</span>
+          </div>
+          <div class="suc-metric-val" id="suc-total-deliveries">13</div>
+          <div class="suc-metric-label">Entregas hoy</div>
+        </div>
+      </div>
+
+      <!-- Streak badge -->
+      <div class="success-streak">
+        <div class="streak-flame">🔥</div>
+        <div class="streak-text">
+          <div class="big" id="suc-streak-label">¡3 entregas seguidas!</div>
+          <div class="sub">Sigue así, vas muy bien hoy</div>
+        </div>
+      </div>
+
+    </div><!-- /success-body -->
+
+    <!-- CTA -->
+    <div class="success-cta">
+      <button class="btn-success-primary" onclick="continueAfterSuccess()">
+        Ver siguiente pedido
+      </button>
+      <button class="btn-success-secondary" onclick="continueAfterSuccess()">
+        Volver al inicio
+      </button>
+    </div>
+
+  </div><!-- /screen-success -->
+
+  <!-- ============================================================
        EXCEPTION MODAL — Cliente no responde / Problema
        Lives inside #app so it overlays everything
        ============================================================ -->
@@ -1083,62 +1354,7 @@ html, body {
 
   </div><!-- /exception-sheet -->
 
-  <!-- ============================================================
-       SCREEN 5: VALIDACIÓN Y PIN
-       ============================================================ -->
-  <div class="screen" id="screen-checkout">
-    <div class="app-header">
-      <button class="back-btn" onclick="goTo('screen-nav')">
-        <span class="material-symbols-outlined">chevron_left</span>
-      </button>
-      <div style="flex: 1;">
-        <div style="font-size: 16px; font-weight: 800; color: var(--text-primary);">Confirmar entrega</div>
-        <div style="font-size: 12px; color: var(--text-secondary);">Orden #ORD-8492</div>
-      </div>
-    </div>
 
-    <div class="screen-body" style="padding: var(--xl);">
-      <div style="background: var(--surface-primary); border-radius: var(--r-lg); padding: var(--lg); text-align: center; border: 1px solid var(--border-subtle); box-shadow: var(--shadow-sm); margin-bottom: var(--xl);">
-        <span class="badge badge-success">Pagado en línea</span>
-        <div style="font-size: 12px; color: var(--text-secondary); margin-top: 6px;">Monto a cobrar en sitio</div>
-        <div style="font-size: 28px; font-weight: 800; color: var(--text-primary); margin-top: 2px;">$0.00</div>
-      </div>
-
-      <div style="text-align: center;">
-        <div style="font-size: 15px; font-weight: 800; color: var(--text-primary);">Ingrese PIN del cliente</div>
-        <div style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;">Solicite los 4 dígitos de confirmación (Demo: 1234)</div>
-      </div>
-
-      <div class="pin-input-group" id="pin-input-group">
-        <div class="pin-digit-box" id="pin-box-0"></div>
-        <div class="pin-digit-box" id="pin-box-1"></div>
-        <div class="pin-digit-box" id="pin-box-2"></div>
-        <div class="pin-digit-box" id="pin-box-3"></div>
-      </div>
-      <div class="pin-attempts-msg" id="pin-attempts-msg"></div>
-
-      <div class="ios-keypad">
-        <button class="keypad-btn" onclick="pressPinKey('1')">1</button>
-        <button class="keypad-btn" onclick="pressPinKey('2')">2</button>
-        <button class="keypad-btn" onclick="pressPinKey('3')">3</button>
-        <button class="keypad-btn" onclick="pressPinKey('4')">4</button>
-        <button class="keypad-btn" onclick="pressPinKey('5')">5</button>
-        <button class="keypad-btn" onclick="pressPinKey('6')">6</button>
-        <button class="keypad-btn" onclick="pressPinKey('7')">7</button>
-        <button class="keypad-btn" onclick="pressPinKey('8')">8</button>
-        <button class="keypad-btn" onclick="pressPinKey('9')">9</button>
-        <button class="keypad-btn" style="font-size: 12px; color: var(--text-secondary);" onclick="clearPin()">C</button>
-        <button class="keypad-btn" onclick="pressPinKey('0')">0</button>
-        <button class="keypad-btn" onclick="deletePinDigit()"><span class="material-symbols-outlined">backspace</span></button>
-      </div>
-    </div>
-
-    <div class="bottom-action-bar">
-      <button id="btn-finish-delivery" class="btn btn-primary" style="width: 100%;" onclick="finishDelivery()" disabled>
-        Finalizar entrega
-      </button>
-    </div>
-  </div>
 
   <div class="toast-ios" id="toast-ios"></div>
 
@@ -1702,19 +1918,128 @@ html, body {
     const pickupBtn = document.getElementById('btn-confirm-pickup');
     if (pickupBtn) pickupBtn.disabled = true;
 
-    // BUG FIX: Destroy full map so it re-initializes cleanly next order
+    // Destroy map
     if (state.driverMoveInterval) { clearInterval(state.driverMoveInterval); state.driverMoveInterval = null; }
     if (state.fullMap) { state.fullMap.remove(); state.fullMap = null; state.driverMarker = null; }
     state.routeAhead = null; state.routeBehind = null;
     state.routeAllSteps = []; state.routeCurrentStep = 0;
-    sheetExpanded = true; // reset sheet state for next order
-    resetSheet();         // re-open detail panel for next order
+    sheetExpanded = true;
+    resetSheet();
 
-    // Clear nav history and go back to dashboard
+    // Navigate to success screen instead of dashboard
+    launchSuccess();
+  }
+
+  // ================================================================
+  // SUCCESS SCREEN
+  // ================================================================
+  let successStartTime = null;
+
+  function launchSuccess() {
+    // Record when delivery started for elapsed time
+    const elapsedMin = successStartTime
+      ? Math.round((Date.now() - successStartTime) / 60000)
+      : 12;
+
+    // Populate metrics
+    document.getElementById('suc-earning').textContent         = `$${state.earnings.toFixed(2).split('.')[0] === '0' ? '4.50' : '4.50'}`;
+    document.getElementById('suc-time').textContent            = `${elapsedMin} min`;
+    document.getElementById('suc-total-deliveries').textContent = state.deliveries;
+    const streakEl = document.getElementById('suc-streak-label');
+    if (streakEl) {
+      const s = state.deliveries % 5 || 5;
+      streakEl.textContent = `¡${s} ${s === 1 ? 'entrega' : 'entregas'} seguida${s !== 1 ? 's' : ''}!`;
+    }
+
+    // Navigate
+    goTo('screen-success');
+
+    // Stagger metric card pop-in
+    setTimeout(() => animateSuccessMetrics(), 700);
+
+    // Confetti
+    setTimeout(() => launchConfetti(), 400);
+
+    // Haptic celebration
+    if (navigator.vibrate) navigator.vibrate([80, 40, 80, 40, 200]);
+  }
+
+  function animateSuccessMetrics() {
+    ['suc-card-earn','suc-card-time','suc-card-dist','suc-card-total'].forEach((id, i) => {
+      setTimeout(() => {
+        const el = document.getElementById(id);
+        if (el) el.classList.add('pop');
+      }, i * 80);
+    });
+  }
+
+  function continueAfterSuccess() {
+    // Reset card states for next time
+    ['suc-card-earn','suc-card-time','suc-card-dist','suc-card-total'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.classList.remove('pop');
+    });
     state.screenHistory = ['screen-dashboard'];
     history.replaceState({ screen: 'screen-dashboard' }, '', '#screen-dashboard');
     goTo('screen-dashboard', false);
-    showToast('🎉 ¡Entrega completada!');
+    successStartTime = null;
+  }
+
+  /* ---- Canvas Confetti ---- */
+  function launchConfetti() {
+    const canvas = document.getElementById('confetti-canvas');
+    if (!canvas) return;
+    const ctx  = canvas.getContext('2d');
+    canvas.width  = canvas.offsetWidth;
+    canvas.height = canvas.offsetHeight;
+
+    const COLORS = ['#FFD60A','#FF9500','#34C759','#007AFF','#FF3B30','#AF52DE','#FFFFFF'];
+    const N = 120;
+    const particles = Array.from({ length: N }, () => ({
+      x:  Math.random() * canvas.width,
+      y: -Math.random() * canvas.height * 0.5,
+      r:  Math.random() * 6 + 3,
+      color: COLORS[Math.floor(Math.random() * COLORS.length)],
+      vx: (Math.random() - 0.5) * 4,
+      vy: Math.random() * 4 + 2,
+      rot:  Math.random() * 360,
+      rotV: (Math.random() - 0.5) * 8,
+      shape: Math.random() > 0.5 ? 'rect' : 'circle',
+    }));
+
+    let frame;
+    let ttl = 220; // frames
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particles.forEach(p => {
+        p.x   += p.vx;
+        p.y   += p.vy;
+        p.rot += p.rotV;
+        p.vy  += 0.08; // gravity
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.rot * Math.PI / 180);
+        ctx.fillStyle = p.color;
+        ctx.globalAlpha = Math.min(1, ttl / 40);
+        if (p.shape === 'rect') {
+          ctx.fillRect(-p.r, -p.r * 0.5, p.r * 2, p.r);
+        } else {
+          ctx.beginPath();
+          ctx.arc(0, 0, p.r * 0.6, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.restore();
+        // Wrap horizontally
+        if (p.x < 0) p.x = canvas.width;
+        if (p.x > canvas.width) p.x = 0;
+      });
+      ttl--;
+      if (ttl > 0) frame = requestAnimationFrame(draw);
+      else ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+    if (frame) cancelAnimationFrame(frame);
+    draw();
   }
 
   // ================================================================
