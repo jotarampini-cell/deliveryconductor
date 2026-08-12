@@ -575,6 +575,127 @@ html, body {
   white-space: nowrap; box-shadow: var(--shadow-md);
 }
 .toast-ios.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ============================================================
+   EXCEPCIÓN — Cliente no responde / Problema en entrega
+   ============================================================ */
+.exception-backdrop {
+  position: absolute; inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+  z-index: 800;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+.exception-backdrop.open { opacity: 1; pointer-events: all; }
+
+.exception-sheet {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  background: var(--surface-primary);
+  border-radius: var(--r-xl) var(--r-xl) 0 0;
+  z-index: 810;
+  transform: translateY(100%);
+  transition: transform 0.38s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 -8px 32px rgba(0,0,0,0.15);
+  max-height: 90vh; overflow-y: auto;
+}
+.exception-sheet.open { transform: translateY(0); }
+
+/* Header with animated warning icon */
+.exc-header {
+  padding: 20px 20px 0;
+  display: flex; align-items: center; gap: 14px;
+}
+.exc-icon-ring {
+  width: 48px; height: 48px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--danger-surface);
+  animation: exc-pulse 2s ease-in-out infinite;
+}
+@keyframes exc-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255,59,48,0.3); }
+  50%       { box-shadow: 0 0 0 10px rgba(255,59,48,0); }
+}
+.exc-icon-ring .material-symbols-outlined { font-size: 26px; color: var(--danger-color); }
+.exc-title { font-size: 18px; font-weight: 800; color: var(--text-primary); }
+.exc-subtitle { font-size: 13px; color: var(--text-secondary); margin-top: 2px; }
+
+/* Timer block */
+.exc-timer-block {
+  margin: 20px 20px 0;
+  background: var(--danger-surface);
+  border-radius: var(--r-lg);
+  padding: 16px;
+  display: flex; align-items: center; gap: 16px;
+}
+.exc-timer-ring { position: relative; width: 64px; height: 64px; flex-shrink: 0; }
+.exc-timer-svg  { width: 64px; height: 64px; transform: rotate(-90deg); }
+.exc-ring-bg    { fill: none; stroke: rgba(255,59,48,0.15); stroke-width: 5; }
+.exc-ring-fill  {
+  fill: none; stroke: var(--danger-color); stroke-width: 5;
+  stroke-linecap: round;
+  stroke-dasharray: 175.9; /* 2π × 28 */
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset 1s linear;
+}
+.exc-timer-num {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; font-weight: 800; color: var(--danger-color);
+}
+.exc-timer-text .big  { font-size: 15px; font-weight: 800; color: var(--text-primary); }
+.exc-timer-text .sub  { font-size: 12px; color: var(--text-secondary); margin-top: 3px; line-height: 1.4; }
+
+/* Option cards */
+.exc-options {
+  display: flex; flex-direction: column; gap: 10px;
+  padding: 16px 20px;
+}
+.exc-option-card {
+  display: flex; align-items: center; gap: 14px;
+  padding: 14px 16px; border-radius: var(--r-md);
+  background: var(--surface-secondary);
+  border: 1.5px solid var(--border-subtle);
+  cursor: pointer; transition: all 0.15s ease;
+  text-align: left;
+}
+.exc-option-card:active { transform: scale(0.98); }
+.exc-option-card.danger  { border-color: rgba(255,59,48,0.2); background: var(--danger-surface); }
+.exc-option-card.warning { border-color: rgba(255,149,0,0.2); background: var(--warning-surface); }
+.exc-option-card.success { border-color: rgba(52,199,89,0.2); background: var(--success-surface); }
+.exc-option-icon {
+  width: 40px; height: 40px; border-radius: 50%; display: flex;
+  align-items: center; justify-content: center; flex-shrink: 0;
+}
+.exc-option-icon .material-symbols-outlined { font-size: 20px; }
+.exc-option-icon.icon-blue    { background: rgba(0,122,255,0.12); }
+.exc-option-icon.icon-blue   .material-symbols-outlined { color: var(--brand-primary); }
+.exc-option-icon.icon-orange  { background: var(--warning-surface); }
+.exc-option-icon.icon-orange .material-symbols-outlined { color: var(--warning-color); }
+.exc-option-icon.icon-red     { background: var(--danger-surface); }
+.exc-option-icon.icon-red    .material-symbols-outlined { color: var(--danger-color); }
+.exc-option-icon.icon-green   { background: var(--success-surface); }
+.exc-option-icon.icon-green  .material-symbols-outlined { color: var(--success-color); }
+.exc-option-label  { font-size: 14px; font-weight: 700; color: var(--text-primary); }
+.exc-option-desc   { font-size: 12px; color: var(--text-secondary); margin-top: 2px; line-height: 1.4; }
+
+/* Escalation panel (shown after timer expires) */
+.exc-escalation {
+  display: none;
+  margin: 0 20px 4px;
+  padding: 16px;
+  background: var(--warning-surface);
+  border-radius: var(--r-md);
+  border: 1.5px solid rgba(255,149,0,0.25);
+}
+.exc-escalation.visible { display: block; }
+.exc-esc-title { font-size: 14px; font-weight: 800; color: var(--warning-color); margin-bottom: 8px; }
+.exc-esc-desc  { font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
+
+.exc-footer {
+  padding: 0 20px max(20px, env(safe-area-inset-bottom));
+  padding-top: 4px;
+}
 </style>
 </head>
 
@@ -862,13 +983,105 @@ html, body {
           Llegué a la ubicación
         </button>
         <button class="btn-ghost-danger"
-                onclick="showToast('⏱ Timer de tolerancia iniciado · 5 min')">
+                onclick="openException()">
           Cliente no responde
         </button>
       </div>
 
     </div><!-- /nav-sheet -->
   </div><!-- /screen-nav -->
+
+  <!-- ============================================================
+       EXCEPTION MODAL — Cliente no responde / Problema
+       Lives inside #app so it overlays everything
+       ============================================================ -->
+  <div id="exception-backdrop" class="exception-backdrop" onclick="closeException()"></div>
+  <div id="exception-sheet" class="exception-sheet">
+
+    <!-- Header -->
+    <div class="exc-header">
+      <div class="exc-icon-ring">
+        <span class="material-symbols-outlined">person_off</span>
+      </div>
+      <div>
+        <div class="exc-title" id="exc-title">Cliente no responde</div>
+        <div class="exc-subtitle" id="exc-subtitle">Orden #ORD-8492 · Laura Sánchez</div>
+      </div>
+    </div>
+
+    <!-- Countdown timer -->
+    <div class="exc-timer-block">
+      <div class="exc-timer-ring">
+        <svg class="exc-timer-svg" viewBox="0 0 64 64">
+          <circle class="exc-ring-bg"  cx="32" cy="32" r="28"/>
+          <circle class="exc-ring-fill" id="exc-ring" cx="32" cy="32" r="28"/>
+        </svg>
+        <div class="exc-timer-num" id="exc-timer-num">5:00</div>
+      </div>
+      <div class="exc-timer-text">
+        <div class="big">Tiempo de tolerancia</div>
+        <div class="sub">Debes esperar 5 minutos antes de poder escalar o devolver el pedido. El cronómetro corre mientras el cliente no responde.</div>
+      </div>
+    </div>
+
+    <!-- Escalation panel (visible after timer) -->
+    <div class="exc-escalation" id="exc-escalation">
+      <div class="exc-esc-title">⏰ Tiempo de espera agotado</div>
+      <div class="exc-esc-desc">El tiempo de tolerancia ha vencido. Selecciona cómo proceder con esta entrega.</div>
+    </div>
+
+    <!-- Options -->
+    <div class="exc-options">
+
+      <div class="exc-option-card" onclick="excOptionCall()">
+        <div class="exc-option-icon icon-blue">
+          <span class="material-symbols-outlined">call</span>
+        </div>
+        <div>
+          <div class="exc-option-label">Llamar al cliente</div>
+          <div class="exc-option-desc">Hacer una última llamada directa antes de tomar una decisión</div>
+        </div>
+      </div>
+
+      <div class="exc-option-card warning" onclick="excOptionWhatsapp()">
+        <div class="exc-option-icon icon-orange">
+          <span class="material-symbols-outlined">chat</span>
+        </div>
+        <div>
+          <div class="exc-option-label">Enviar mensaje</div>
+          <div class="exc-option-desc">&ldquo;Estoy en la puerta, te espero&rdquo; por WhatsApp</div>
+        </div>
+      </div>
+
+      <div class="exc-option-card danger" id="exc-btn-return" onclick="excOptionReturn()">
+        <div class="exc-option-icon icon-red">
+          <span class="material-symbols-outlined">undo</span>
+        </div>
+        <div>
+          <div class="exc-option-label">Devolver al local</div>
+          <div class="exc-option-desc" id="exc-return-desc">Disponible tras cumplir el tiempo de tolerancia</div>
+        </div>
+      </div>
+
+      <div class="exc-option-card success" id="exc-btn-delivered" onclick="excOptionDelivered()">
+        <div class="exc-option-icon icon-green">
+          <span class="material-symbols-outlined">check_circle</span>
+        </div>
+        <div>
+          <div class="exc-option-label">Entrega completada</div>
+          <div class="exc-option-desc">El cliente abrió la puerta — cerrar la excepción</div>
+        </div>
+      </div>
+
+    </div><!-- /exc-options -->
+
+    <div class="exc-footer">
+      <button class="btn btn-secondary" style="width:100%;" onclick="closeException()">
+        Cancelar
+      </button>
+    </div>
+
+  </div><!-- /exception-sheet -->
 
   <!-- ============================================================
        SCREEN 5: VALIDACIÓN Y PIN
@@ -1353,9 +1566,7 @@ html, body {
     window.open(`https://maps.google.com/maps?daddr=${lat},${lng}`, '_blank');
   }
 
-  function triggerExceptionModal() {
-    showToast('⚠️ Reportar problema — próximamente disponible');
-  }
+  function triggerExceptionModal() { openException(); }
 
   function goToCheckout() { goTo('screen-checkout'); }
 
@@ -1504,6 +1715,166 @@ html, body {
     history.replaceState({ screen: 'screen-dashboard' }, '', '#screen-dashboard');
     goTo('screen-dashboard', false);
     showToast('🎉 ¡Entrega completada!');
+  }
+
+  // ================================================================
+  // EXCEPTION FLOW — Cliente no responde / Problema en entrega
+  // ================================================================
+  const EXC_TOTAL_SECS = 300; // 5 min
+  let excTimerInterval  = null;
+  let excSecsLeft       = EXC_TOTAL_SECS;
+  let excTimerExpired   = false;
+
+  function openException() {
+    // Reset state
+    excSecsLeft     = EXC_TOTAL_SECS;
+    excTimerExpired = false;
+
+    // Reset ring
+    const ring = document.getElementById('exc-ring');
+    if (ring) { ring.style.transition = 'none'; ring.style.strokeDashoffset = '0'; }
+
+    // Reset timer label
+    const numEl = document.getElementById('exc-timer-num');
+    if (numEl) numEl.textContent = '5:00';
+
+    // Hide escalation panel, lock "devolver" option
+    const escPanel  = document.getElementById('exc-escalation');
+    const retBtn    = document.getElementById('exc-btn-return');
+    const retDesc   = document.getElementById('exc-return-desc');
+    if (escPanel) escPanel.classList.remove('visible');
+    if (retBtn)   retBtn.style.opacity = '0.45';
+    if (retBtn)   retBtn.style.pointerEvents = 'none';
+    if (retDesc)  retDesc.textContent = 'Disponible tras cumplir el tiempo de tolerancia';
+
+    // Open sheet
+    document.getElementById('exception-backdrop').classList.add('open');
+    setTimeout(() => {
+      document.getElementById('exception-sheet').classList.add('open');
+    }, 20);
+
+    // Haptic
+    if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+
+    // Start timer
+    startExceptionTimer();
+  }
+
+  function closeException() {
+    stopExceptionTimer();
+    document.getElementById('exception-sheet').classList.remove('open');
+    setTimeout(() => {
+      document.getElementById('exception-backdrop').classList.remove('open');
+    }, 300);
+  }
+
+  function startExceptionTimer() {
+    stopExceptionTimer();
+    const ring  = document.getElementById('exc-ring');
+    const numEl = document.getElementById('exc-timer-num');
+    const CIRC  = 175.9; // 2π × 28
+
+    // Trigger CSS transition after a frame
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        if (ring) {
+          ring.style.transition = `stroke-dashoffset ${EXC_TOTAL_SECS}s linear`;
+          ring.style.strokeDashoffset = String(CIRC);
+        }
+      });
+    });
+
+    excTimerInterval = setInterval(() => {
+      excSecsLeft--;
+
+      // Format mm:ss
+      const m = Math.floor(excSecsLeft / 60);
+      const s = excSecsLeft % 60;
+      if (numEl) numEl.textContent = `${m}:${s.toString().padStart(2,'0')}`;
+
+      // Haptic pulse every 60s
+      if (excSecsLeft > 0 && excSecsLeft % 60 === 0) {
+        if (navigator.vibrate) navigator.vibrate(80);
+      }
+
+      if (excSecsLeft <= 0) {
+        stopExceptionTimer();
+        onExceptionTimerExpired();
+      }
+    }, 1000);
+  }
+
+  function stopExceptionTimer() {
+    if (excTimerInterval) { clearInterval(excTimerInterval); excTimerInterval = null; }
+  }
+
+  function onExceptionTimerExpired() {
+    excTimerExpired = true;
+    if (navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 200]);
+
+    // Show escalation panel
+    const escPanel = document.getElementById('exc-escalation');
+    if (escPanel) escPanel.classList.add('visible');
+
+    // Unlock "devolver" option
+    const retBtn  = document.getElementById('exc-btn-return');
+    const retDesc = document.getElementById('exc-return-desc');
+    if (retBtn)  { retBtn.style.opacity = '1'; retBtn.style.pointerEvents = 'auto'; }
+    if (retDesc) retDesc.textContent = 'Devuelve el pedido al comercio de origen';
+
+    // Update ring color to warning
+    const ring = document.getElementById('exc-ring');
+    if (ring) ring.style.stroke = 'var(--warning-color)';
+
+    const numEl = document.getElementById('exc-timer-num');
+    if (numEl) { numEl.textContent = '0:00'; numEl.style.color = 'var(--warning-color)'; }
+
+    showToast('⏰ Tiempo agotado · Ya puedes escalar o devolver');
+  }
+
+  // ---- Option handlers ----
+  function excOptionCall() {
+    closeException();
+    window.location.href = 'tel:+573001111111';
+  }
+
+  function excOptionWhatsapp() {
+    const msg = encodeURIComponent('Hola Laura, soy el repartidor. Estoy en la puerta esperando tu entrega 📦');
+    window.open(`https://wa.me/573001111111?text=${msg}`, '_blank');
+    showToast('💬 Mensaje de WhatsApp abierto');
+  }
+
+  function excOptionReturn() {
+    if (!excTimerExpired) {
+      showToast('⏳ Aún debes esperar el tiempo de tolerancia');
+      if (navigator.vibrate) navigator.vibrate([60, 30, 60]);
+      return;
+    }
+    stopExceptionTimer();
+    closeException();
+    // Reset order and return to dashboard
+    setTimeout(() => {
+      if (state.driverMoveInterval) { clearInterval(state.driverMoveInterval); state.driverMoveInterval = null; }
+      if (state.fullMap) { state.fullMap.remove(); state.fullMap = null; state.driverMarker = null; }
+      state.routeAhead = null; state.routeBehind = null;
+      state.routeAllSteps = []; state.routeCurrentStep = 0;
+      sheetExpanded = true; resetSheet();
+      document.querySelectorAll('.list-row').forEach(r => r.classList.remove('checked'));
+      document.getElementById('check-count').textContent = '0';
+      const pickupBtn = document.getElementById('btn-confirm-pickup');
+      if (pickupBtn) pickupBtn.disabled = true;
+      state.screenHistory = ['screen-dashboard'];
+      history.replaceState({ screen: 'screen-dashboard' }, '', '#screen-dashboard');
+      goTo('screen-dashboard', false);
+      showToast('🔙 Pedido devuelto al local');
+    }, 350);
+  }
+
+  function excOptionDelivered() {
+    stopExceptionTimer();
+    closeException();
+    setTimeout(() => goTo('screen-checkout'), 300);
+    showToast('✅ Excepción cerrada — confirmando entrega');
   }
 
   // ================================================================
