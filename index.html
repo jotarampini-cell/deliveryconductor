@@ -697,7 +697,6 @@ html, body {
   border-radius: var(--r-lg);
   box-shadow: var(--shadow-sm);
   overflow: hidden;
-  animation: suc-fade-up 0.45s 0.85s ease both;
 }
 .suc-order-row {
   display: flex; align-items: center; justify-content: space-between;
@@ -710,17 +709,6 @@ html, body {
 .suc-row-val   { font-size: 13px; color: var(--text-primary);   font-weight: 700; }
 .suc-row-val.green { color: #34C759; }
 
-/* Streak strip */
-.suc-streak-strip {
-  width: 100%; margin-top: 14px;
-  background: #FFF8EC; border: 1px solid rgba(255,149,0,0.2);
-  border-radius: var(--r-md);
-  padding: 12px 16px;
-  display: flex; align-items: center; gap: 10px;
-  animation: suc-fade-up 0.45s 1.0s ease both;
-}
-.suc-streak-strip .lbl { font-size: 13px; font-weight: 700; color: #FF9500; }
-.suc-streak-strip .sub { font-size: 11px; color: var(--text-secondary); }
 
 /* CTA bar */
 .success-cta {
@@ -1286,15 +1274,6 @@ html, body {
         <div class="suc-order-row">
           <span class="suc-row-label">Estado</span>
           <span class="suc-row-val green">✔ Entregado</span>
-        </div>
-      </div>
-
-      <!-- Streak strip -->
-      <div class="suc-streak-strip">
-        <span style="font-size:22px;">🔥</span>
-        <div>
-          <div class="lbl" id="suc-streak-label">¡3 entregas seguidas!</div>
-          <div class="sub">Sigue así, vas muy bien hoy</div>
         </div>
       </div>
 
