@@ -744,6 +744,94 @@ html, body {
 
 
 /* ============================================================
+   SCREEN 7 — HISTORIAL DEL DÍA
+   ============================================================ */
+#screen-history {
+  display: flex; flex-direction: column;
+  background: var(--bg-app);
+}
+.hist-header {
+  padding: max(52px, env(safe-area-inset-top)) var(--lg) var(--lg);
+  background: var(--surface-primary);
+  border-bottom: 1px solid var(--border-subtle);
+}
+.hist-header-top {
+  display: flex; align-items: center; gap: 10px; margin-bottom: var(--xl);
+}
+.hist-back-btn {
+  width: 36px; height: 36px; border-radius: 50%;
+  border: none; background: var(--surface-tertiary);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; flex-shrink: 0;
+}
+.hist-back-btn .material-symbols-outlined { font-size: 20px; color: var(--text-primary); }
+.hist-title { font-size: 20px; font-weight: 800; color: var(--text-primary); }
+.hist-date  { font-size: 12px; color: var(--text-secondary); margin-top: 1px; }
+
+/* Summary bar */
+.hist-summary-row {
+  display: flex; gap: 0;
+  background: var(--surface-secondary);
+  border-radius: var(--r-md);
+  overflow: hidden;
+  border: 1px solid var(--border-subtle);
+}
+.hist-sum-item {
+  flex: 1; padding: 14px 8px;
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  border-right: 1px solid var(--border-subtle);
+}
+.hist-sum-item:last-child { border-right: none; }
+.hist-sum-val   { font-size: 18px; font-weight: 800; color: var(--text-primary); }
+.hist-sum-label { font-size: 10px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.4px; }
+
+/* List */
+.hist-list-body {
+  flex: 1; overflow-y: auto;
+  padding: var(--lg);
+  display: flex; flex-direction: column; gap: 10px;
+}
+.hist-card {
+  background: var(--surface-primary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-sm);
+  padding: 14px 16px;
+  display: flex; align-items: center; gap: 14px;
+  cursor: default;
+  transition: background 0.15s;
+}
+.hist-card:active { background: var(--surface-secondary); }
+.hist-num {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: var(--success-surface);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 800; color: var(--success-color);
+  flex-shrink: 0;
+}
+.hist-card-body { flex: 1; min-width: 0; }
+.hist-card-top  { display: flex; align-items: center; justify-content: space-between; }
+.hist-client    { font-size: 14px; font-weight: 700; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hist-earning   { font-size: 14px; font-weight: 800; color: var(--success-color); flex-shrink: 0; margin-left: 8px; }
+.hist-addr      { font-size: 12px; color: var(--text-secondary); margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hist-meta      { display: flex; gap: 10px; margin-top: 5px; }
+.hist-meta-chip {
+  font-size: 11px; font-weight: 600; color: var(--text-secondary);
+  background: var(--surface-tertiary); border-radius: var(--r-full);
+  padding: 2px 8px;
+}
+
+/* Empty state */
+.hist-empty {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 10px; padding: 40px 24px; text-align: center;
+}
+.hist-empty .material-symbols-outlined { font-size: 48px; color: var(--text-tertiary); }
+.hist-empty-title { font-size: 16px; font-weight: 700; color: var(--text-secondary); }
+.hist-empty-sub   { font-size: 13px; color: var(--text-tertiary); }
+
+/* ============================================================
    EXCEPCIÓN — Cliente no responde / Problema en entrega
    ============================================================ */
 .exception-backdrop {
@@ -925,7 +1013,7 @@ html, body {
         <span class="material-symbols-outlined">navigation</span>
         <span class="nav-label">Rutas</span>
       </button>
-      <button class="nav-item" onclick="setActiveNav(this)">
+      <button class="nav-item" onclick="goToHistory(); setActiveNav(this)">
         <span class="material-symbols-outlined">history</span>
         <span class="nav-label">Historial</span>
       </button>
@@ -934,7 +1022,43 @@ html, body {
         <span class="nav-label">Cuenta</span>
       </button>
     </nav>
-  </div>
+  </div><!-- /screen-dashboard -->
+
+  <!-- ============================================================
+       SCREEN 7: HISTORIAL DEL DÍA
+       ============================================================ -->
+  <div class="screen" id="screen-history">
+    <div class="hist-header">
+      <div class="hist-header-top">
+        <button class="hist-back-btn" onclick="goBack()">
+          <span class="material-symbols-outlined">chevron_left</span>
+        </button>
+        <div>
+          <div class="hist-title">Historial del día</div>
+          <div class="hist-date" id="hist-date-label">Hoy</div>
+        </div>
+      </div>
+      <div class="hist-summary-row">
+        <div class="hist-sum-item">
+          <div class="hist-sum-val" id="hist-sum-count">0</div>
+          <div class="hist-sum-label">Entregas</div>
+        </div>
+        <div class="hist-sum-item">
+          <div class="hist-sum-val" id="hist-sum-earn">$0.00</div>
+          <div class="hist-sum-label">Ganado</div>
+        </div>
+        <div class="hist-sum-item">
+          <div class="hist-sum-val" id="hist-sum-dist">0 km</div>
+          <div class="hist-sum-label">Distancia</div>
+        </div>
+        <div class="hist-sum-item">
+          <div class="hist-sum-val" id="hist-sum-time">0 min</div>
+          <div class="hist-sum-label">Tiempo</div>
+        </div>
+      </div>
+    </div>
+    <div class="hist-list-body" id="hist-list-body"></div>
+  </div><!-- /screen-history -->
 
   <!-- ============================================================
        SCREEN 2: MODAL DE ALERTA (OVERLAY)
@@ -1414,6 +1538,11 @@ html, body {
     routeBehind: null,
     routeAllSteps: [],
     routeCurrentStep: 0,
+    deliveryLog: [
+      { id: '#ORD-8492', client: 'Laura Sánchez', address: 'Calle 72 #15-30', earning: 4.50, distKm: 1.2, timeMin: 12, timeStr: '11:42 AM' },
+      { id: '#ORD-8488', client: 'Carlos Mendoza', address: 'Carrera 11 #93-12', earning: 5.20, distKm: 3.4, timeMin: 18, timeStr: '10:55 AM' },
+      { id: '#ORD-8485', client: 'Restaurante Gourmet', address: 'Av. Chile #7-45', earning: 3.80, distKm: 0.9, timeMin: 9, timeStr: '09:30 AM' },
+    ],
   };
 
   // ================================================================
@@ -1938,6 +2067,17 @@ html, body {
     document.getElementById('metric-deliveries').textContent = state.deliveries;
     document.getElementById('metric-earnings').textContent   = `$${state.earnings.toFixed(2)}`;
 
+    // Add to delivery history log
+    state.deliveryLog.unshift({
+      id: `#ORD-${Math.floor(1000 + Math.random() * 9000)}`,
+      client: 'Laura Sánchez',
+      address: 'Calle 72 #15-30',
+      earning: 4.50,
+      distKm: 1.2,
+      timeMin: 12,
+      timeStr: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    });
+
     // Reset PIN
     resetPinState();
 
@@ -2229,6 +2369,62 @@ html, body {
     closeException();
     setTimeout(() => goTo('screen-checkout'), 300);
     showToast('✅ Excepción cerrada — confirmando entrega');
+  }
+
+  // ================================================================
+  // HISTORY SCREEN
+  // ================================================================
+  function goToHistory() {
+    renderHistoryList();
+    goTo('screen-history');
+  }
+
+  function renderHistoryList() {
+    const listEl = document.getElementById('hist-list-body');
+    if (!listEl) return;
+
+    const countEl = document.getElementById('hist-sum-count');
+    const earnEl  = document.getElementById('hist-sum-earn');
+    const distEl  = document.getElementById('hist-sum-dist');
+    const timeEl  = document.getElementById('hist-sum-time');
+
+    const totalEarn = state.deliveryLog.reduce((acc, item) => acc + item.earning, 0);
+    const totalDist = state.deliveryLog.reduce((acc, item) => acc + item.distKm, 0);
+    const totalTime = state.deliveryLog.reduce((acc, item) => acc + item.timeMin, 0);
+
+    if (countEl) countEl.textContent = state.deliveryLog.length;
+    if (earnEl)  earnEl.textContent  = `$${totalEarn.toFixed(2)}`;
+    if (distEl)  distEl.textContent  = `${totalDist.toFixed(1)} km`;
+    if (timeEl)  timeEl.textContent  = `${totalTime} min`;
+
+    if (!state.deliveryLog || state.deliveryLog.length === 0) {
+      listEl.innerHTML = `
+        <div class="hist-empty">
+          <span class="material-symbols-outlined">history_toggle_off</span>
+          <div class="hist-empty-title">Sin entregas aún</div>
+          <div class="hist-empty-sub">Las entregas completadas hoy aparecerán aquí.</div>
+        </div>
+      `;
+      return;
+    }
+
+    listEl.innerHTML = state.deliveryLog.map((item) => `
+      <div class="hist-card">
+        <div class="hist-num">✓</div>
+        <div class="hist-card-body">
+          <div class="hist-card-top">
+            <span class="hist-client">${item.client}</span>
+            <span class="hist-earning">+$${item.earning.toFixed(2)}</span>
+          </div>
+          <div class="hist-addr">${item.address}</div>
+          <div class="hist-meta">
+            <span class="hist-meta-chip">📍 ${item.distKm} km</span>
+            <span class="hist-meta-chip">⏱ ${item.timeMin} min</span>
+            <span class="hist-meta-chip">🕒 ${item.timeStr}</span>
+          </div>
+        </div>
+      </div>
+    `).join('');
   }
 
   // ================================================================
