@@ -396,16 +396,96 @@ html, body {
   display: flex; flex-direction: column; gap: 10px; z-index: 500;
 }
 
+/* ============================================================
+   DRAGGABLE BOTTOM SHEET — 2 snap positions
+   ============================================================ */
 .map-bottom-sheet {
-  position: relative; z-index: 600;
+  position: absolute; bottom: 0; left: 0; right: 0;
+  z-index: 600;
   background: var(--surface-primary);
   border-radius: var(--r-xl) var(--r-xl) 0 0;
-  box-shadow: var(--shadow-lg); flex-shrink: 0;
+  box-shadow: var(--shadow-lg);
+  /* height is controlled by JS transform */
+  will-change: transform;
+  touch-action: none;
 }
+.sheet-drag-zone {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 10px 0 4px; cursor: grab;
+  user-select: none;
+}
+.sheet-drag-zone:active { cursor: grabbing; }
 .sheet-drag-pill {
   width: 36px; height: 5px; border-radius: var(--r-full);
-  background: var(--surface-tertiary); margin: 10px auto 4px;
+  background: var(--surface-tertiary);
+  transition: background 0.2s, width 0.2s;
 }
+.sheet-drag-zone:hover .sheet-drag-pill { background: #C7C7CC; width: 44px; }
+
+/* Peek-mode collapsed info row */
+.sheet-peek-row {
+  display: flex; align-items: center; gap: 16px;
+  padding: 0 20px 14px;
+  overflow: hidden;
+}
+.sheet-eta-block { display: flex; flex-direction: column; }
+.sheet-eta-num   { font-size: 26px; font-weight: 800; color: var(--text-primary); line-height: 1; }
+.sheet-eta-unit  { font-size: 11px; font-weight: 600; color: var(--text-secondary); margin-top: 2px; }
+.sheet-divider-v { width: 1px; height: 36px; background: var(--border-subtle); flex-shrink: 0; }
+.sheet-route-mini { flex: 1; }
+.sheet-route-mini .name  { font-size: 15px; font-weight: 700; color: var(--text-primary); }
+.sheet-route-mini .dist  { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+
+/* Expanded detail panel */
+.sheet-expanded-panel {
+  overflow: hidden;
+  transition: max-height 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+              opacity    0.3s ease;
+  max-height: 0; opacity: 0;
+}
+.sheet-expanded-panel.open { max-height: 320px; opacity: 1; }
+.sheet-expanded-inner {
+  padding: 0 20px 4px;
+  display: flex; flex-direction: column; gap: 14px;
+  border-top: 1px solid var(--border-subtle);
+  padding-top: 14px;
+}
+.customer-row {
+  display: flex; align-items: center; justify-content: space-between;
+}
+.customer-name { font-size: 18px; font-weight: 800; color: var(--text-primary); }
+.quick-btns    { display: flex; gap: 10px; }
+.addr-line     { font-size: 13px; color: var(--text-secondary); line-height: 1.5; }
+.delivery-note-box {
+  background: var(--surface-tertiary); border-radius: var(--r-sm);
+  padding: 10px 12px; font-size: 12px; color: var(--text-secondary);
+  line-height: 1.5; border-left: 3px solid var(--brand-primary);
+}
+
+/* ETA progress bar */
+.eta-progress-wrap {
+  height: 3px; background: var(--surface-tertiary);
+  border-radius: var(--r-full); overflow: hidden; margin: 2px 20px 0;
+}
+.eta-progress-bar {
+  height: 100%; background: var(--brand-primary);
+  border-radius: var(--r-full); width: 0%;
+  transition: width 2.5s linear;
+}
+
+/* Sheet action bar */
+.sheet-action-bar {
+  padding: 12px 20px max(16px, env(safe-area-inset-bottom));
+  display: flex; flex-direction: column; gap: 8px;
+  border-top: 1px solid var(--border-subtle);
+}
+.btn-ghost-danger {
+  width: 100%; height: 40px; border: none; background: transparent;
+  color: var(--danger-color); font-family: var(--font);
+  font-size: 13px; font-weight: 700; cursor: pointer;
+  border-radius: var(--r-full); transition: background 0.15s;
+}
+.btn-ghost-danger:hover { background: var(--danger-surface); }
 
 /* FIX: Disabled button visual state */
 .btn-primary:disabled {
@@ -673,45 +753,101 @@ html, body {
   </div>
 
   <!-- ============================================================
-       SCREEN 4: NAVEGACIÓN EN MAPA
+       SCREEN 4: NAVEGACIÓN EN MAPA — Draggable Bottom Sheet
        ============================================================ -->
-  <div class="screen" id="screen-nav">
-    <div class="map-container-full">
-      <div id="leaflet-map"></div>
+  <div class="screen" id="screen-nav" style="position:relative;">
 
-      <div class="map-floating-controls">
-        <button class="btn-icon" onclick="recenterMap()"><span class="material-symbols-outlined">my_location</span></button>
-        <button class="btn-icon" onclick="openExternalGPS()"><span class="material-symbols-outlined">map</span></button>
-      </div>
+    <!-- Full-screen map -->
+    <div id="leaflet-map" style="position:absolute;inset:0;z-index:1;"></div>
 
-      <div style="position: absolute; top: 16px; left: 16px; z-index: 500;">
-        <button class="btn-icon" style="background: var(--danger-surface); border-color: rgba(255,59,48,0.2);" onclick="triggerExceptionModal()">
-          <span class="material-symbols-outlined" style="color: var(--danger-color);">report</span>
-        </button>
-      </div>
+    <!-- Floating map controls (top-right) -->
+    <div class="map-floating-controls" style="z-index:700;">
+      <button class="btn-icon" onclick="recenterMap()" title="Mi ubicación">
+        <span class="material-symbols-outlined">my_location</span>
+      </button>
+      <button class="btn-icon" onclick="openExternalGPS()" title="Abrir GPS">
+        <span class="material-symbols-outlined">map</span>
+      </button>
     </div>
 
-    <div class="map-bottom-sheet">
-      <div class="sheet-drag-pill"></div>
-      <div style="padding: 12px var(--xl) var(--xl);">
-        <div style="display: flex; align-items: center; justify-content: space-between;">
-          <div>
-            <div style="font-size: 22px; font-weight: 800; color: var(--text-primary);">8 min <span style="font-size: 13px; font-weight: 500; color: var(--text-secondary);">(1.2 km)</span></div>
-            <div style="font-size: 14px; font-weight: 700; color: var(--text-primary); margin-top: 2px;">Laura Sánchez</div>
-            <div style="font-size: 12px; color: var(--text-secondary);">Calle 72 #15-30, Apto 401</div>
+    <!-- Exception button (top-left) -->
+    <div style="position:absolute;top:16px;left:16px;z-index:700;">
+      <button class="btn-icon" style="background:var(--danger-surface);border-color:rgba(255,59,48,0.2);"
+              onclick="triggerExceptionModal()">
+        <span class="material-symbols-outlined" style="color:var(--danger-color);">report</span>
+      </button>
+    </div>
+
+    <!-- ── Draggable Bottom Sheet ── -->
+    <div class="map-bottom-sheet" id="nav-sheet">
+
+      <!-- Drag handle zone -->
+      <div class="sheet-drag-zone" id="sheet-drag-zone">
+        <div class="sheet-drag-pill"></div>
+      </div>
+
+      <!-- Always-visible peek row -->
+      <div class="sheet-peek-row">
+        <div class="sheet-eta-block">
+          <span class="sheet-eta-num" id="sheet-eta-min">8</span>
+          <span class="sheet-eta-unit">min</span>
+        </div>
+        <div class="sheet-divider-v"></div>
+        <div class="sheet-route-mini">
+          <div class="name">Laura Sánchez</div>
+          <div class="dist" id="sheet-dist">1.2 km restantes</div>
+        </div>
+        <button class="btn-icon" id="sheet-expand-btn" onclick="toggleSheet()"
+                style="flex-shrink:0;" title="Expandir">
+          <span class="material-symbols-outlined" id="sheet-chevron">expand_less</span>
+        </button>
+      </div>
+
+      <!-- ETA progress bar -->
+      <div class="eta-progress-wrap">
+        <div class="eta-progress-bar" id="eta-bar"></div>
+      </div>
+
+      <!-- Expanded detail panel -->
+      <div class="sheet-expanded-panel open" id="sheet-expanded">
+        <div class="sheet-expanded-inner">
+          <div class="customer-row">
+            <div class="customer-name">Laura Sánchez</div>
+            <div class="quick-btns">
+              <a href="tel:+573001111111" style="text-decoration:none;">
+                <button class="btn-icon" title="Llamar">
+                  <span class="material-symbols-outlined">call</span>
+                </button>
+              </a>
+              <a href="https://wa.me/573001111111" target="_blank" style="text-decoration:none;">
+                <button class="btn-icon" style="background:#E8F5E9;border-color:rgba(37,211,102,0.2);" title="WhatsApp">
+                  <span class="material-symbols-outlined" style="color:#25D366;">chat</span>
+                </button>
+              </a>
+            </div>
           </div>
-          <div style="display: flex; gap: 8px;">
-            <a href="tel:04149998877" class="btn-icon" style="display: flex; align-items: center; justify-content: center; text-decoration: none;">
-              <span class="material-symbols-outlined">call</span>
-            </a>
+          <div class="addr-line">
+            <strong>Calle 72 #15-30</strong> · Apto 401, Piso 4<br>
+            Edificio Las Palmas · Bogotá
+          </div>
+          <div class="delivery-note-box">
+            💬 Tocar el timbre izquierdo. Dejar en portería si no hay respuesta.
           </div>
         </div>
+      </div>
 
-        <button class="btn btn-primary" style="width: 100%; margin-top: 16px;" onclick="goToCheckout()">
+      <!-- Action buttons -->
+      <div class="sheet-action-bar">
+        <button class="btn btn-primary" style="width:100%;" onclick="goToCheckout()">
+          <span class="material-symbols-outlined">location_on</span>
           Llegué a la ubicación
         </button>
+        <button class="btn-ghost-danger" onclick="showToast('⏱ Timer de tolerancia iniciado · 5 min')">
+          Cliente no responde
+        </button>
       </div>
-    </div>
+
+    </div><!-- /nav-sheet -->
   </div>
 
   <!-- ============================================================
@@ -796,6 +932,10 @@ html, body {
     fullMap: null,
     driverMarker: null,
     driverMoveInterval: null,
+    routeAhead: null,
+    routeBehind: null,
+    routeAllSteps: [],
+    routeCurrentStep: 0,
   };
 
   // ================================================================
@@ -1028,107 +1168,166 @@ html, body {
   function confirmPickup() { goTo('screen-nav'); }
 
   // ================================================================
-  // MAPS
+  // MAPS — Full navigation map with animated driver
   // ================================================================
   const MAP_ORIGIN = [10.178, -68.004];
   const MAP_DEST   = [10.183, -67.996];
 
+  // Build a realistic-looking multi-waypoint route
+  const ROUTE_WAYPOINTS = [
+    [10.178,  -68.004],
+    [10.1785, -68.002],
+    [10.179,  -67.9995],
+    [10.1800, -67.999],
+    [10.1812, -67.998],
+    [10.182,  -67.9972],
+    [10.183,  -67.996],
+  ];
+
+  // State for real-time driver progress
+  const ROUTE_STEPS   = 24;   // total animation steps
+  const STEP_INTERVAL = 2500; // ms per step (~60s total)
+
   function initMiniMap() {
-    if (state.miniMap) return; // Already initialized — reuse
+    if (state.miniMap) return;
     state.miniMap = L.map('alert-mini-map', {
       zoomControl: false, dragging: false, scrollWheelZoom: false,
       doubleClickZoom: false, touchZoom: false, attributionControl: false
     }).setView([10.180, -68.000], 14);
     L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
       { subdomains: 'abcd' }).addTo(state.miniMap);
-    L.polyline([MAP_ORIGIN, MAP_DEST], { color: '#007AFF', weight: 4, opacity: 0.9 }).addTo(state.miniMap);
+    L.polyline(ROUTE_WAYPOINTS, { color: '#007AFF', weight: 4, opacity: 0.9 }).addTo(state.miniMap);
     L.circleMarker(MAP_ORIGIN, { radius: 6, color: '#007AFF', fillColor: '#007AFF', fillOpacity: 1 }).addTo(state.miniMap);
     L.circleMarker(MAP_DEST,   { radius: 6, color: '#FF3B30', fillColor: '#FF3B30', fillOpacity: 1 }).addTo(state.miniMap);
-    state.miniMap.fitBounds([MAP_ORIGIN, MAP_DEST], { padding: [16, 16] });
+    state.miniMap.fitBounds([MAP_ORIGIN, MAP_DEST], { padding: [20, 20] });
   }
 
   function initFullMap() {
-    // BUG FIX: If map container was removed/hidden, invalidate size.
-    // If map already exists, just resize and return.
     if (state.fullMap) {
       setTimeout(() => state.fullMap.invalidateSize(), 100);
       return;
     }
 
     state.fullMap = L.map('leaflet-map', {
-      zoomControl: false, attributionControl: false
-    }).fitBounds([MAP_ORIGIN, MAP_DEST], { padding: [80, 80] });
+      zoomControl: false, attributionControl: false, zoomSnap: 0.5
+    }).fitBounds([MAP_ORIGIN, MAP_DEST], { padding: [80, 160] });
 
     L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
       { subdomains: 'abcd', maxZoom: 19 }).addTo(state.fullMap);
 
-    // Route: glow + solid line
-    L.polyline([MAP_ORIGIN, MAP_DEST], { color: '#007AFF', weight: 14, opacity: 0.10, lineCap: 'round' }).addTo(state.fullMap);
-    L.polyline([MAP_ORIGIN, MAP_DEST], { color: '#007AFF', weight: 5,  opacity: 0.90, lineCap: 'round' }).addTo(state.fullMap);
+    // Route: outer glow + solid line + already-traveled (grey)
+    L.polyline(ROUTE_WAYPOINTS, { color: '#007AFF', weight: 16, opacity: 0.08, lineCap: 'round', lineJoin: 'round' }).addTo(state.fullMap);
+    state.routeAhead  = L.polyline(ROUTE_WAYPOINTS, { color: '#007AFF', weight: 5, opacity: 0.92, lineCap: 'round', lineJoin: 'round' }).addTo(state.fullMap);
+    state.routeBehind = L.polyline([], { color: '#C7C7CC', weight: 5, opacity: 0.6,  lineCap: 'round', lineJoin: 'round' }).addTo(state.fullMap);
 
-    // Store marker (pill label)
+    // Store pill marker
     const storeIcon = L.divIcon({
-      html: `<div style="background:#fff;border-radius:100px;padding:4px 10px 4px 6px;display:flex;align-items:center;gap:6px;box-shadow:0 2px 8px rgba(0,0,0,0.15);white-space:nowrap;font-family:'Plus Jakarta Sans',sans-serif;">
-        <div style="width:24px;height:24px;border-radius:50%;background:#EFEFF4;display:flex;align-items:center;justify-content:center;">
+      html: `<div style="background:#fff;border-radius:100px;padding:4px 10px 4px 6px;display:flex;align-items:center;gap:6px;box-shadow:0 2px 10px rgba(0,0,0,0.15);white-space:nowrap;font-family:'Plus Jakarta Sans',sans-serif;">
+        <div style="width:24px;height:24px;border-radius:50%;background:#EFF4FF;display:flex;align-items:center;justify-content:center;">
           <span class="material-symbols-outlined" style="font-size:14px;color:#007AFF;">storefront</span>
         </div>
-        <span style="font-size:11px;font-weight:700;color:#1C1C1E;">Burger Palace</span>
+        <span style="font-size:11px;font-weight:800;color:#1C1C1E;">Burger Palace</span>
       </div>`,
-      className: '', iconAnchor: [0, 18]
+      className: '', iconAnchor: [0, 20]
     });
     L.marker(MAP_ORIGIN, { icon: storeIcon }).addTo(state.fullMap);
 
-    // Destination pin SVG
+    // Destination pin
     const destIcon = L.divIcon({
-      html: `<div style="position:relative;width:32px;height:38px;">
-        <svg viewBox="0 0 32 38" width="32" height="38">
-          <path d="M16 0C7.16 0 0 7.16 0 16c0 11.2 16 22 16 22s16-10.8 16-22C32 7.16 24.84 0 16 0z" fill="#FF3B30"/>
+      html: `<div style="position:relative;width:36px;">
+        <div style="position:absolute;top:-10px;left:50%;transform:translateX(-50%);
+          background:#1C1C1E;color:#fff;border-radius:100px;padding:2px 8px;
+          font-size:10px;font-weight:800;white-space:nowrap;
+          font-family:'Plus Jakarta Sans',sans-serif;">8 min</div>
+        <svg viewBox="0 0 32 40" width="32" height="40" style="margin-top:6px;display:block;">
+          <path d="M16 0C7.16 0 0 7.16 0 16c0 11.2 16 24 16 24s16-12.8 16-24C32 7.16 24.84 0 16 0z" fill="#FF3B30"/>
           <circle cx="16" cy="16" r="7" fill="white"/>
         </svg>
       </div>`,
-      className: '', iconAnchor: [16, 38]
+      className: '', iconAnchor: [16, 46]
     });
     L.marker(MAP_DEST, { icon: destIcon }).addTo(state.fullMap);
 
     // Driver pulsing dot
-    const driverIcon = L.divIcon({
-      html: `<div style="position:relative;width:28px;height:28px;">
-        <div style="position:absolute;inset:0;border-radius:50%;background:rgba(0,122,255,0.18);animation:pulse-ring 2s ease-in-out infinite;"></div>
-        <div style="position:absolute;inset:6px;border-radius:50%;background:#007AFF;box-shadow:0 2px 6px rgba(0,122,255,0.4);"></div>
-        <div style="position:absolute;inset:9px;border-radius:50%;background:#fff;"></div>
-      </div>`,
-      className: '', iconAnchor: [14, 14]
-    });
-    state.driverMarker = L.marker(MAP_ORIGIN, { icon: driverIcon }).addTo(state.fullMap);
+    const driverHtml = `<div style="position:relative;width:32px;height:32px;">
+      <div style="position:absolute;inset:0;border-radius:50%;background:rgba(0,122,255,0.18);animation:pulse-ring 2s ease-in-out infinite;"></div>
+      <div style="position:absolute;inset:5px;border-radius:50%;background:#007AFF;box-shadow:0 2px 8px rgba(0,122,255,0.5);"></div>
+      <div style="position:absolute;inset:9px;border-radius:50%;background:#fff;"></div>
+    </div>`;
+    const driverIcon = L.divIcon({ html: driverHtml, className: '', iconAnchor: [16, 16] });
+    state.driverMarker = L.marker(MAP_ORIGIN, { icon: driverIcon, zIndexOffset: 1000 }).addTo(state.fullMap);
 
-    // Animate driver along route (12 steps over ~24 s)
-    const steps = interpolateRoute(MAP_ORIGIN, MAP_DEST, 12);
-    let step = 0;
-    clearInterval(state.driverMoveInterval);
-    state.driverMoveInterval = setInterval(() => {
-      if (step < steps.length) {
-        state.driverMarker.setLatLng(steps[step++]);
-      } else {
-        clearInterval(state.driverMoveInterval);
-      }
-    }, 2000);
+    // Expanded route steps for smooth animation
+    state.routeAllSteps    = expandRoute(ROUTE_WAYPOINTS, ROUTE_STEPS);
+    state.routeCurrentStep = 0;
+    state.etaSeconds       = ROUTE_STEPS * STEP_INTERVAL / 1000; // ~60 s
+
+    // Start the driver movement loop
+    startDriverAnimation();
+
+    // Init bottom sheet drag
+    initSheet();
+
+    // ETA progress bar (starts filling immediately)
+    setTimeout(() => {
+      const bar = document.getElementById('eta-bar');
+      if (bar) bar.style.width = '100%';
+    }, 100);
   }
 
-  function interpolateRoute(a, b, n) {
+  // ---- Expand waypoints into N smooth steps ----
+  function expandRoute(waypoints, totalSteps) {
     const pts = [];
-    for (let i = 0; i <= n; i++) {
-      const t = i / n;
-      const jitter = (Math.random() - 0.5) * 0.0008 * Math.sin(Math.PI * t);
-      pts.push([ a[0] + (b[0] - a[0]) * t + jitter,
-                 a[1] + (b[1] - a[1]) * t + jitter * 0.5 ]);
+    const segs = waypoints.length - 1;
+    for (let i = 0; i < totalSteps; i++) {
+      const t   = i / (totalSteps - 1);
+      const seg = Math.min(Math.floor(t * segs), segs - 1);
+      const lt  = (t * segs) - seg;
+      const a   = waypoints[seg], b = waypoints[seg + 1];
+      pts.push([
+        a[0] + (b[0] - a[0]) * lt,
+        a[1] + (b[1] - a[1]) * lt,
+      ]);
     }
-    pts[0] = a; pts[n] = b;
     return pts;
+  }
+
+  function startDriverAnimation() {
+    clearInterval(state.driverMoveInterval);
+    state.driverMoveInterval = setInterval(() => {
+      const step = ++state.routeCurrentStep;
+      const all  = state.routeAllSteps;
+      if (!state.driverMarker || step >= all.length) {
+        clearInterval(state.driverMoveInterval);
+        return;
+      }
+
+      // Move the marker
+      state.driverMarker.setLatLng(all[step]);
+
+      // Update behind (grey) / ahead (blue) polylines
+      if (state.routeBehind) state.routeBehind.setLatLngs(all.slice(0, step + 1));
+      if (state.routeAhead)  state.routeAhead.setLatLngs(all.slice(step));
+
+      // Update ETA display (count down from full)
+      const pct       = step / (all.length - 1);
+      const remSteps  = all.length - 1 - step;
+      const etaMin    = Math.max(0, Math.round(remSteps * STEP_INTERVAL / 60000));
+      const distKm    = ((1 - pct) * 1.2).toFixed(1);
+
+      const etaEl  = document.getElementById('sheet-eta-min');
+      const distEl = document.getElementById('sheet-dist');
+      if (etaEl)  etaEl.textContent  = etaMin || '<1';
+      if (distEl) distEl.textContent = `${distKm} km restantes`;
+
+      // Keep map centered on driver
+      if (state.fullMap) state.fullMap.panTo(all[step], { animate: true, duration: 0.8 });
+    }, STEP_INTERVAL);
   }
 
   function recenterMap() {
     if (state.fullMap && state.driverMarker) {
-      state.fullMap.setView(state.driverMarker.getLatLng(), 15, { animate: true, duration: 0.5 });
+      state.fullMap.setView(state.driverMarker.getLatLng(), 15, { animate: true, duration: 0.6 });
     }
   }
 
@@ -1142,6 +1341,117 @@ html, body {
   }
 
   function goToCheckout() { goTo('screen-checkout'); }
+
+  // ================================================================
+  // DRAGGABLE BOTTOM SHEET — 2 snap positions
+  // ================================================================
+  const SHEET_PEEK     = 0;   // translateY when EXPANDED (no offset)
+  let   sheetExpanded  = true;
+  let   sheetDragging  = false;
+  let   sheetStartY    = 0;
+  let   sheetStartT    = 0;
+  let   sheetVelocityY = 0;
+
+  function initSheet() {
+    const zone  = document.getElementById('sheet-drag-zone');
+    const sheet = document.getElementById('nav-sheet');
+    if (!zone || !sheet) return;
+
+    // Compute snap positions after DOM settles
+    setTimeout(() => {
+      snapSheet(sheetExpanded ? 'expanded' : 'peek', false);
+    }, 120);
+
+    zone.addEventListener('mousedown',  onSheetDown);
+    zone.addEventListener('touchstart', onSheetDown, { passive: true });
+    window.addEventListener('mousemove',  onSheetMove);
+    window.addEventListener('touchmove',  onSheetMove, { passive: false });
+    window.addEventListener('mouseup',    onSheetUp);
+    window.addEventListener('touchend',   onSheetUp);
+  }
+
+  function getSheetHeights() {
+    const sheet     = document.getElementById('nav-sheet');
+    const mapEl     = document.getElementById('leaflet-map');
+    const screenH   = document.getElementById('screen-nav').clientHeight;
+    const sheetFull = sheet ? sheet.scrollHeight : 300;
+    const peekH     = 130;                         // px exposed in peek mode
+    const expandedT = Math.max(0, screenH - sheetFull); // translateY for fully expanded
+    const peekT     = screenH - peekH;             // translateY for peek
+    return { expandedT, peekT, screenH };
+  }
+
+  function snapSheet(pos, animate = true) {
+    const sheet = document.getElementById('nav-sheet');
+    if (!sheet) return;
+    const { expandedT, peekT } = getSheetHeights();
+    const targetY = pos === 'expanded' ? expandedT : peekT;
+
+    sheet.style.transition = animate
+      ? 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)'
+      : 'none';
+    sheet.style.transform  = `translateY(${Math.max(0, targetY)}px)`;
+
+    sheetExpanded = pos === 'expanded';
+    const panel   = document.getElementById('sheet-expanded');
+    const chevron = document.getElementById('sheet-chevron');
+    if (panel)   panel.classList.toggle('open', sheetExpanded);
+    if (chevron) chevron.textContent = sheetExpanded ? 'expand_more' : 'expand_less';
+
+    // Resize map to fill visible area above sheet
+    if (state.fullMap) setTimeout(() => state.fullMap.invalidateSize(), 420);
+  }
+
+  function toggleSheet() {
+    snapSheet(sheetExpanded ? 'peek' : 'expanded');
+  }
+
+  function onSheetDown(e) {
+    sheetDragging  = true;
+    sheetStartY    = e.touches ? e.touches[0].clientY : e.clientY;
+    sheetStartT    = performance.now();
+    sheetVelocityY = 0;
+    const sheet    = document.getElementById('nav-sheet');
+    if (sheet) sheet.style.transition = 'none';
+  }
+
+  function onSheetMove(e) {
+    if (!sheetDragging) return;
+    if (e.cancelable) e.preventDefault();
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    const delta   = clientY - sheetStartY;
+    const { expandedT, peekT } = getSheetHeights();
+    const baseY   = sheetExpanded ? expandedT : peekT;
+    const newY    = Math.max(expandedT - 20, Math.min(peekT + 20, baseY + delta));
+
+    const sheet = document.getElementById('nav-sheet');
+    if (sheet) sheet.style.transform = `translateY(${newY}px)`;
+
+    const now = performance.now();
+    sheetVelocityY = delta / Math.max(1, now - sheetStartT);
+    sheetStartY  = clientY;
+    sheetStartT  = now;
+  }
+
+  function onSheetUp() {
+    if (!sheetDragging) return;
+    sheetDragging = false;
+
+    const { expandedT, peekT } = getSheetHeights();
+    const sheet  = document.getElementById('nav-sheet');
+    if (!sheet) return;
+    const mat    = new WebKitCSSMatrix(getComputedStyle(sheet).transform);
+    const currY  = mat.m42;
+    const midY   = (expandedT + peekT) / 2;
+
+    // Use velocity to determine snap direction
+    let snapPos;
+    if      (sheetVelocityY >  0.4) snapPos = 'peek';     // flick down
+    else if (sheetVelocityY < -0.4) snapPos = 'expanded'; // flick up
+    else                             snapPos = currY < midY ? 'expanded' : 'peek';
+
+    snapSheet(snapPos);
+  }
 
   // ================================================================
   // PIN VALIDATION (P5)
@@ -1255,6 +1565,9 @@ html, body {
     // BUG FIX: Destroy full map so it re-initializes cleanly next order
     if (state.driverMoveInterval) { clearInterval(state.driverMoveInterval); state.driverMoveInterval = null; }
     if (state.fullMap) { state.fullMap.remove(); state.fullMap = null; state.driverMarker = null; }
+    state.routeAhead = null; state.routeBehind = null;
+    state.routeAllSteps = []; state.routeCurrentStep = 0;
+    sheetExpanded = true; // reset sheet state for next order
 
     // Clear nav history and go back to dashboard
     state.screenHistory = ['screen-dashboard'];
