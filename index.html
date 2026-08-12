@@ -978,54 +978,58 @@ html, body {
        SCREEN 1: DASHBOARD
        ============================================================ -->
   <div class="screen active" id="screen-dashboard">
-    <div class="dashboard-header">
-      <div class="driver-profile-group">
-        <div class="driver-avatar-circle">JT</div>
-        <div>
-          <div class="driver-name-text">Juan Torres</div>
-          <div class="driver-role-text">Repartidor independiente</div>
+    <!-- MAP BACKGROUND -->
+    <div id="dash-map" style="position: absolute; inset: 0; z-index: 1;"></div>
+    
+    <!-- GRADIENT OVERLAY TOP -->
+    <div style="position: absolute; top: 0; left: 0; right: 0; height: 160px; background: linear-gradient(to bottom, rgba(255,255,255,0.95), transparent); z-index: 2; pointer-events: none;"></div>
+    
+    <!-- DASHBOARD FOREGROUND (HEADER) -->
+    <div class="dash-floating-header" style="position: absolute; top: max(40px, env(safe-area-inset-top)); left: 16px; right: 16px; z-index: 3; pointer-events: none;">
+      <!-- Toggle Pill -->
+      <div style="display: flex; justify-content: center; margin-bottom: 24px; pointer-events: auto;">
+        <div class="driver-switch online" id="driver-switch" onclick="toggleDriverStatus()" style="box-shadow: var(--shadow-lg); width: auto; padding: 12px 24px; border-radius: 100px; background: var(--surface-primary);">
+          <div class="status-indicator-dot"></div>
+          <span class="switch-label" id="status-label-text" style="font-size: 14px;">Disponible</span>
         </div>
       </div>
-      <div class="driver-switch online" id="driver-switch" onclick="toggleDriverStatus()">
-        <div class="status-indicator-dot"></div>
-        <span class="switch-label" id="status-label-text">Disponible</span>
-      </div>
-    </div>
-
-    <div class="screen-body">
-      <div class="section-title-label">Resumen de la jornada</div>
-      <div class="metrics-grid">
+      
+      <!-- Metrics Cards (Floating) -->
+      <div class="metrics-grid" style="pointer-events: auto; background: var(--surface-primary); border-radius: var(--r-md); padding: 16px; box-shadow: var(--shadow-md); gap: 12px;">
         <div class="metric-box">
           <div class="metric-val" id="metric-deliveries">12</div>
           <div class="metric-sub">Entregas</div>
         </div>
         <div class="metric-box">
           <div class="metric-val">34.2</div>
-          <div class="metric-sub">Kilómetros</div>
+          <div class="metric-sub">Km</div>
         </div>
         <div class="metric-box">
-          <div class="metric-val" id="metric-earnings">$48.50</div>
+          <div class="metric-val" id="metric-earnings" style="color: var(--success-color);">$48.50</div>
           <div class="metric-sub">Total</div>
         </div>
       </div>
-
-      <div class="empty-card">
-        <div class="empty-icon-box">
-          <span class="material-symbols-outlined">two_wheeler</span>
+    </div>
+    
+    <!-- EMPTY STATE CARD / SIMULATE BUTTON -->
+    <div style="position: absolute; bottom: 84px; left: 16px; right: 16px; z-index: 3; pointer-events: none;">
+      <div class="empty-card" style="pointer-events: auto; box-shadow: var(--shadow-lg); background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); border: none;">
+        <div class="empty-icon-box" style="background: var(--surface-tertiary);">
+          <span class="material-symbols-outlined">radar</span>
         </div>
         <div>
-          <div style="font-size: 16px; font-weight: 800; color: var(--text-primary);">En espera de asignación</div>
+          <div style="font-size: 16px; font-weight: 800; color: var(--text-primary);">Buscando pedidos...</div>
           <div style="font-size: 13px; color: var(--text-secondary); margin-top: 4px; line-height: 1.4;">
-            Mantén la aplicación abierta. Te notificaremos cuando se genere una orden cercana.
+            Estás en una zona de alta demanda. Mantente alerta.
           </div>
         </div>
-        <button class="btn btn-secondary" style="margin-top: 8px;" onclick="triggerOrderAlert()">
+        <button class="btn btn-secondary" style="margin-top: 12px;" onclick="triggerOrderAlert()">
           Simular nuevo pedido
         </button>
       </div>
     </div>
 
-    <nav class="bottom-nav">
+    <nav class="bottom-nav" style="z-index: 4;">
       <button class="nav-item active" onclick="setActiveNav(this)">
         <span class="material-symbols-outlined">navigation</span>
         <span class="nav-label">Rutas</span>
@@ -1095,12 +1099,16 @@ html, body {
        SCREEN 2: MODAL DE ALERTA (OVERLAY)
        ============================================================ -->
   <div class="screen" id="screen-alert">
-    <div class="alert-backdrop-blur" onclick="rejectOrder()"></div>
-    <div class="alert-sheet-card" id="alert-sheet-card">
-      <div class="alert-top-bar">
+    <!-- Map Background -->
+    <div id="alert-mini-map" style="position: absolute; inset: 0; z-index: 1;"></div>
+    
+    <!-- Subtle overlay to focus on the card -->
+    <div class="alert-backdrop-blur" onclick="rejectOrder()" style="z-index: 2; background: rgba(0,0,0,0.15); backdrop-filter: none;"></div>
+    
+    <div class="alert-sheet-card" id="alert-sheet-card" style="z-index: 3; display: flex; flex-direction: column;">
+      <div class="alert-top-bar" style="border-bottom: none; padding-bottom: 0;">
         <div>
-          <span class="badge badge-warning">Nueva solicitud</span>
-          <div style="font-size: 20px; font-weight: 800; color: var(--text-primary); margin-top: 4px;">Orden #ORD-8492</div>
+          <span class="badge badge-warning" style="font-size: 14px; padding: 6px 10px;">Nueva solicitud</span>
         </div>
         <div class="countdown-box">
           <svg class="countdown-svg" viewBox="0 0 48 48">
@@ -1111,15 +1119,25 @@ html, body {
         </div>
       </div>
 
+      <div style="padding: 0 var(--xl) var(--md); text-align: center;">
+        <div style="font-size: 48px; font-weight: 800; color: var(--success-color); letter-spacing: -1.5px; margin: 12px 0 8px;">
+          +$4.50
+        </div>
+        <div style="display: flex; gap: var(--sm); justify-content: center; margin-bottom: var(--lg);">
+          <span class="badge badge-neutral" style="font-size: 13px;">3.2 km totales</span>
+          <span class="badge badge-neutral" style="font-size: 13px;">~12 min</span>
+        </div>
+      </div>
+
       <div style="padding: 0 var(--xl); overflow-y: auto;">
-        <div class="route-timeline">
+        <div class="route-timeline" style="margin-bottom: var(--xl);">
           <div class="timeline-step">
             <div class="timeline-icon">
               <span class="material-symbols-outlined">storefront</span>
             </div>
             <div>
-              <div style="font-size: 14px; font-weight: 700; color: var(--text-primary);">Burger Palace</div>
-              <div style="font-size: 12px; color: var(--text-secondary);">Av. Libertador 4520, Local 2B</div>
+              <div style="font-size: 15px; font-weight: 700; color: var(--text-primary);">Burger Palace</div>
+              <div style="font-size: 13px; color: var(--text-secondary);">Av. Libertador 4520</div>
             </div>
           </div>
           <div class="timeline-step">
@@ -1127,29 +1145,21 @@ html, body {
               <span class="material-symbols-outlined">person_pin_circle</span>
             </div>
             <div>
-              <div style="font-size: 14px; font-weight: 700; color: var(--text-primary);">Laura Sánchez</div>
-              <div style="font-size: 12px; color: var(--text-secondary);">Calle 72 #15-30, Apto 401</div>
+              <div style="font-size: 15px; font-weight: 700; color: var(--text-primary);">Laura Sánchez</div>
+              <div style="font-size: 13px; color: var(--text-secondary);">Calle 72 #15-30</div>
             </div>
           </div>
         </div>
-
-        <div style="display: flex; gap: var(--sm); margin-bottom: var(--lg);">
-          <span class="badge badge-neutral">3.2 km</span>
-          <span class="badge badge-neutral">~12 min</span>
-          <span class="badge badge-success">Tarifa: $4.50</span>
-        </div>
-
-        <div id="alert-mini-map" style="height: 110px; border-radius: var(--r-md); overflow: hidden; border: 1px solid var(--border-subtle); margin-bottom: var(--xl);"></div>
       </div>
 
-      <div style="padding: var(--xl); border-top: 1px solid var(--border-subtle); display: flex; flex-direction: column; gap: var(--md);">
-        <div class="swipe-track-ios" id="swipe-track">
-          <div class="swipe-text-ios">Desliza para aceptar</div>
-          <div class="swipe-thumb-ios" id="swipe-thumb">
-            <span class="material-symbols-outlined">arrow_forward</span>
+      <div style="padding: var(--lg) var(--xl); border-top: 1px solid var(--border-subtle); display: flex; flex-direction: column; gap: var(--md); background: var(--surface-primary);">
+        <div class="swipe-track-ios" id="swipe-track" style="height: 64px; border-radius: 32px;">
+          <div class="swipe-text-ios" style="font-size: 17px; font-weight: 700;">Desliza para aceptar</div>
+          <div class="swipe-thumb-ios" id="swipe-thumb" style="width: 56px; height: 56px; top: 4px; left: 4px; border-radius: 50%;">
+            <span class="material-symbols-outlined" style="font-size: 28px;">arrow_forward</span>
           </div>
         </div>
-        <button class="btn btn-secondary" style="border: none; box-shadow: none; color: var(--text-secondary);" onclick="rejectOrder()">
+        <button class="btn btn-secondary" style="border: none; box-shadow: none; color: var(--text-secondary); background: transparent; padding: 12px; font-size: 15px; font-weight: 600;" onclick="rejectOrder()">
           Rechazar solicitud
         </button>
       </div>
@@ -1563,6 +1573,7 @@ html, body {
     pinVerified: false,
     miniMap: null,
     fullMap: null,
+    dashMap: null,
     driverMarker: null,
     driverMoveInterval: null,
     routeAhead: null,
@@ -1656,6 +1667,7 @@ html, body {
     });
 
     // Side-effects per screen
+    if (screenId === 'screen-dashboard') setTimeout(initDashboardMap, 200);
     if (screenId === 'screen-nav')      setTimeout(initFullMap, 200);
     if (screenId === 'screen-checkout') resetPinState();
   }
@@ -1872,7 +1884,10 @@ html, body {
   const STEP_INTERVAL = 2500; // ms per step (~60s total)
 
   function initMiniMap() {
-    if (state.miniMap) return;
+    if (state.miniMap) {
+      setTimeout(() => state.miniMap.invalidateSize(), 100);
+      return;
+    }
     state.miniMap = L.map('alert-mini-map', {
       zoomControl: false, dragging: false, scrollWheelZoom: false,
       doubleClickZoom: false, touchZoom: false, attributionControl: false
@@ -1882,7 +1897,26 @@ html, body {
     L.polyline(ROUTE_WAYPOINTS, { color: '#007AFF', weight: 4, opacity: 0.9 }).addTo(state.miniMap);
     L.circleMarker(MAP_ORIGIN, { radius: 6, color: '#007AFF', fillColor: '#007AFF', fillOpacity: 1 }).addTo(state.miniMap);
     L.circleMarker(MAP_DEST,   { radius: 6, color: '#FF3B30', fillColor: '#FF3B30', fillOpacity: 1 }).addTo(state.miniMap);
-    state.miniMap.fitBounds([MAP_ORIGIN, MAP_DEST], { padding: [20, 20] });
+    state.miniMap.fitBounds([MAP_ORIGIN, MAP_DEST], { paddingBottomRight: [20, 360], paddingTopLeft: [20, 60] });
+  }
+
+  function initDashboardMap() {
+    if (state.dashMap) {
+      setTimeout(() => state.dashMap.invalidateSize(), 100);
+      return;
+    }
+    
+    const dashOrigin = [4.654, -74.058]; 
+    
+    state.dashMap = L.map('dash-map', {
+      zoomControl: false, attributionControl: false, zoomSnap: 0.5
+    }).setView(dashOrigin, 14);
+
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
+      { subdomains: 'abcd', maxZoom: 19 }).addTo(state.dashMap);
+
+    L.circleMarker(dashOrigin, { radius: 10, color: '#007AFF', fillColor: '#007AFF', fillOpacity: 0.2, weight: 0 }).addTo(state.dashMap);
+    L.circleMarker(dashOrigin, { radius: 6, color: '#fff', fillColor: '#007AFF', fillOpacity: 1, weight: 2 }).addTo(state.dashMap);
   }
 
   function initFullMap() {
@@ -2536,9 +2570,11 @@ html, body {
   }
 
   // ================================================================
+  // ================================================================
   // INIT — set initial history state
   // ================================================================
   history.replaceState({ screen: 'screen-dashboard' }, '', '#screen-dashboard');
+  setTimeout(initDashboardMap, 300);
 </script>
 </body>
 </html>
