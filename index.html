@@ -831,6 +831,23 @@ html, body {
 .hist-empty-title { font-size: 16px; font-weight: 700; color: var(--text-secondary); }
 .hist-empty-sub   { font-size: 13px; color: var(--text-tertiary); }
 
+/* Skeletons */
+.skeleton-box {
+  background: linear-gradient(90deg, var(--surface-tertiary) 25%, var(--surface-secondary) 50%, var(--surface-tertiary) 75%);
+  background-size: 400% 100%;
+  animation: skeleton-load 1.4s ease infinite;
+  border-radius: 4px;
+  color: transparent !important;
+}
+.skeleton-circle { border-radius: 50%; }
+@keyframes skeleton-load {
+  0% { background-position: 100% 50%; }
+  100% { background-position: 0 50%; }
+}
+
+.fade-in { animation: fade-in-anim 0.3s ease both; }
+@keyframes fade-in-anim { from { opacity: 0; } to { opacity: 1; } }
+
 /* ============================================================
    EXCEPCIÓN — Cliente no responde / Problema en entrega
    ============================================================ */
@@ -1581,33 +1598,44 @@ html, body {
     const nextIdx = SCREEN_ORDER.indexOf(screenId);
     const goingForward = nextIdx > prevIdx;
 
+    const slideDuration = 450;
+    const easing = 'cubic-bezier(0.36,0.66,0.04,1)'; // iOS swipe feel
+
     // Slide out current
     if (prev) {
       prev.classList.remove('active');
+      prev.style.transition = `transform ${slideDuration}ms ${easing}, filter ${slideDuration}ms ease, opacity ${slideDuration}ms ease`;
       if (goingForward) {
-        prev.style.transition = 'transform 0.35s cubic-bezier(0.16,1,0.3,1), opacity 0.3s ease';
-        prev.style.transform  = 'translateX(-25%)';
-        prev.style.opacity    = '0';
+        prev.style.transform  = 'translateX(-8%) scale(0.96)';
+        prev.style.filter     = 'brightness(0.7)';
+        prev.style.opacity    = '1';
       } else {
-        prev.style.transition = 'transform 0.35s cubic-bezier(0.16,1,0.3,1), opacity 0.3s ease';
         prev.style.transform  = 'translateX(100%)';
-        prev.style.opacity    = '0';
+        prev.style.filter     = 'brightness(1)';
+        prev.style.opacity    = '1';
       }
       setTimeout(() => {
-        if (prev) { prev.style.transform = ''; prev.style.opacity = ''; prev.style.transition = ''; }
-      }, 380);
+        if (prev) { prev.style.transform = ''; prev.style.opacity = ''; prev.style.transition = ''; prev.style.filter = ''; }
+      }, slideDuration + 20);
     }
 
     // Slide in next
-    next.style.transform  = goingForward ? 'translateX(100%)' : 'translateX(-25%)';
-    next.style.opacity    = '0';
+    next.style.transform  = goingForward ? 'translateX(100%)' : 'translateX(-8%) scale(0.96)';
+    next.style.opacity    = '1';
+    next.style.filter     = goingForward ? 'brightness(1)' : 'brightness(0.7)';
     next.style.transition = 'none';
     next.classList.add('active');
+    
+    // Subtle overlap shadow
+    next.style.boxShadow = goingForward ? '-12px 0 24px rgba(0,0,0,0.1)' : 'none';
+
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
-        next.style.transition = 'transform 0.35s cubic-bezier(0.16,1,0.3,1), opacity 0.3s ease';
-        next.style.transform  = 'translateX(0)';
+        next.style.transition = `transform ${slideDuration}ms ${easing}, filter ${slideDuration}ms ease, opacity ${slideDuration}ms ease`;
+        next.style.transform  = 'translateX(0) scale(1)';
+        next.style.filter     = 'brightness(1)';
         next.style.opacity    = '1';
+        setTimeout(() => { next.style.boxShadow = ''; }, slideDuration);
       });
     });
 
@@ -2426,43 +2454,63 @@ html, body {
     const distEl  = document.getElementById('hist-sum-dist');
     const timeEl  = document.getElementById('hist-sum-time');
 
-    const totalEarn = state.deliveryLog.reduce((acc, item) => acc + item.earning, 0);
-    const totalDist = state.deliveryLog.reduce((acc, item) => acc + item.distKm, 0);
-    const totalTime = state.deliveryLog.reduce((acc, item) => acc + item.timeMin, 0);
-
-    if (countEl) countEl.textContent = state.deliveryLog.length;
-    if (earnEl)  earnEl.textContent  = `$${totalEarn.toFixed(2)}`;
-    if (distEl)  distEl.textContent  = `${totalDist.toFixed(1)} km`;
-    if (timeEl)  timeEl.textContent  = `${totalTime} min`;
-
-    if (!state.deliveryLog || state.deliveryLog.length === 0) {
-      listEl.innerHTML = `
-        <div class="hist-empty">
-          <span class="material-symbols-outlined">history_toggle_off</span>
-          <div class="hist-empty-title">Sin entregas aún</div>
-          <div class="hist-empty-sub">Las entregas completadas hoy aparecerán aquí.</div>
-        </div>
-      `;
-      return;
-    }
-
-    listEl.innerHTML = state.deliveryLog.map((item) => `
+    // Show skeletons first
+    listEl.innerHTML = Array(3).fill(`
       <div class="hist-card">
-        <div class="hist-num">✓</div>
+        <div class="hist-num skeleton-box skeleton-circle"></div>
         <div class="hist-card-body">
           <div class="hist-card-top">
-            <span class="hist-client">${item.client}</span>
-            <span class="hist-earning">+$${item.earning.toFixed(2)}</span>
+            <span class="hist-client skeleton-box" style="width: 120px; height: 16px;"></span>
+            <span class="hist-earning skeleton-box" style="width: 40px; height: 16px;"></span>
           </div>
-          <div class="hist-addr">${item.address}</div>
+          <div class="hist-addr skeleton-box" style="width: 180px; height: 14px; margin-top: 6px;"></div>
           <div class="hist-meta">
-            <span class="hist-meta-chip">📍 ${item.distKm} km</span>
-            <span class="hist-meta-chip">⏱ ${item.timeMin} min</span>
-            <span class="hist-meta-chip">🕒 ${item.timeStr}</span>
+            <span class="hist-meta-chip skeleton-box" style="width: 60px; height: 16px;"></span>
+            <span class="hist-meta-chip skeleton-box" style="width: 60px; height: 16px;"></span>
           </div>
         </div>
       </div>
     `).join('');
+
+    setTimeout(() => {
+      const totalEarn = state.deliveryLog.reduce((acc, item) => acc + item.earning, 0);
+      const totalDist = state.deliveryLog.reduce((acc, item) => acc + item.distKm, 0);
+      const totalTime = state.deliveryLog.reduce((acc, item) => acc + item.timeMin, 0);
+
+      if (countEl) countEl.textContent = state.deliveryLog.length;
+      if (earnEl)  earnEl.textContent  = `$${totalEarn.toFixed(2)}`;
+      if (distEl)  distEl.textContent  = `${totalDist.toFixed(1)} km`;
+      if (timeEl)  timeEl.textContent  = `${totalTime} min`;
+
+      if (!state.deliveryLog || state.deliveryLog.length === 0) {
+        listEl.innerHTML = `
+          <div class="hist-empty fade-in">
+            <span class="material-symbols-outlined">history_toggle_off</span>
+            <div class="hist-empty-title">Sin entregas aún</div>
+            <div class="hist-empty-sub">Las entregas completadas hoy aparecerán aquí.</div>
+          </div>
+        `;
+        return;
+      }
+
+      listEl.innerHTML = state.deliveryLog.map((item) => `
+        <div class="hist-card fade-in">
+          <div class="hist-num">✓</div>
+          <div class="hist-card-body">
+            <div class="hist-card-top">
+              <span class="hist-client">${item.client}</span>
+              <span class="hist-earning">+$${item.earning.toFixed(2)}</span>
+            </div>
+            <div class="hist-addr">${item.address}</div>
+            <div class="hist-meta">
+              <span class="hist-meta-chip">📍 ${item.distKm} km</span>
+              <span class="hist-meta-chip">⏱ ${item.timeMin} min</span>
+              <span class="hist-meta-chip">🕒 ${item.timeStr}</span>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }, 450);
   }
 
   // ================================================================
